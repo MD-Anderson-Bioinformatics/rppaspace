@@ -1,0 +1,8 @@
+---
+title: "RPPASPACE"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RPPASPACE}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---

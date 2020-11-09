@@ -1,0 +1,6 @@
+^doc$
+^Meta$
+^RPPASPACE.Rproj$
+^.*\.Rproj$
+^\.Rproj\.user$
+^CRAN_Developer_notes.txt$

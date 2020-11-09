@@ -1,0 +1,20 @@
+Creating the package for CRAN
+
+Use PDFs for vignette documentation for CRAN.  It prefers PDFs to HTML vignettes.
+Make sure GhostScript and PanDoc are installed and the proper environment variables are set up properly for them to work.
+If Ghostscript isn't found the PDFs will be compreessed by qpdf but won't be compressed as much as desired by CRAN.
+
+Build the package with the compressed manual and vignettes.  
+Within R or RStudio
+devtools::build(vignettes=TRUE, manual=TRUE, args='--compact-vignettes="gs+qpdf"')
+or from the command line:
+R CMD build --compact-vignettes="gs+qpdf" RPPASPACE
+
+From command line:
+Run CRAN check against built package, not the source directory or you'll probably get many notes, warnings, and/or errors.
+R CMD check --as-cran RPPASPACE_1.0.4.tar.gz
+
+
+Just a reminder if installing manually from local source package. (Not needed for CRAN)
+Within R:
+install.packages('RPPASPACE_1.0.4.tar.gz', repos=NULL, build_vignettes = TRUE)
