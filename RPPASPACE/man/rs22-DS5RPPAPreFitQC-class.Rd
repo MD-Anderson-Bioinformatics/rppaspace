@@ -66,7 +66,7 @@
   \emph{Development of a Robust Classifier for Quality Control of
   Reverse Phase Protein Arrays.}\cr
   Bioinformatics (2015) 31(6): 912-918.\cr
-  \url{http://www.ncbi.nlm.nih.gov/pubmed/25380958}
+  \url{https://pubmed.ncbi.nlm.nih.gov/25380958/}
 }
 \author{
   P. Roebuck \email{paul_roebuck@comcast.net},

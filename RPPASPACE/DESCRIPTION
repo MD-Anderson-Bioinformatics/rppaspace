@@ -1,17 +1,17 @@
 Package: RPPASPACE
-Version: 1.0.4
-Date: 2020-11-03
+Version: 1.0.5
+Date: 2020-11-09
 Title: Reverse-Phase Protein Array Super Position and Concentration Evaluation
 Author: James M. Melott, P. Roebuck, Kevin R. Coombes, Shannon Neeley, Corwin Joy, Jianhua Hu, and Keith Baggerly
 Maintainer: "James M. Melott" <jmmelott@mdanderson.org>
-Description: The RPPASPACE R package provides tools for the analysis of reverse-phase protein arrays (RPPAs), which are also known as "tissue lysate arrays" or simply "lysate arrays". The package's primary purpose is to input a set of quantification files representing dilution series of samples and control points taken from scanned RPPA slides and determine a relative log concentration value for each valid dilution series present in each slide and provide graphical visualization of the input and output data and their relationships. Other optional features include generation of quality control scores for judging the quality of the input data, spatial adjustment of sample points based on controls added to the slides, and various types of normalization of calculated values across a set of slides. The package was derived from a previous package called SuperCurve. For a detailed description of data inputs and outputs and usage information see the vignette "Guide_to_RPPASPACE".
+Description: Provides tools for the analysis of reverse-phase protein arrays (RPPAs), which are also known as "tissue lysate arrays" or simply "lysate arrays". The package's primary purpose is to input a set of quantification files representing dilution series of samples and control points taken from scanned RPPA slides and determine a relative log concentration value for each valid dilution series present in each slide and provide graphical visualization of the input and output data and their relationships. Other optional features include generation of quality control scores for judging the quality of the input data, spatial adjustment of sample points based on controls added to the slides, and various types of normalization of calculated values across a set of slides. The package was derived from a previous package named SuperCurve. For a detailed description of data inputs and outputs, usage  information, and a list of related papers describing methods used in the package please review the vignette "Guide_to_RPPASPACE". Hu (2007) <doi:10.1093/bioinformatics/btm283>.
 Depends: R (>= 3.50), methods, doParallel, foreach, parallel, iterators
 Imports: utils, grDevices, graphics, stats, MASS, cobs, imager, bmp,
         jpeg, tiff, png, splines, robustbase, mgcv, quantreg
 Suggests: timeDate, boot, knitr, rmarkdown
 NeedsCompilation: no
 VignetteBuilder: knitr, rmarkdown
-URL: https://bcbgitlab1.mdanderson.edu/bcbdev/rppaspace/
+URL: https://github.com/MD-Anderson-Bioinformatics/rppaspace
 License: Artistic-2.0
 Copyright: file COPYRIGHTS
 LazyLoad: yes

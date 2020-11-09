@@ -88,7 +88,7 @@ spatialCorrection(rppa,
   \emph{Surface Adjustment of Reverse Phase Protein Arrays Using Positive
   Control Spots}\cr
   Cancer Informatics (2012) 11: 77-86.\cr
-  \url{http://www.ncbi.nlm.nih.gov/pubmed/22550399}
+  \url{https://pubmed.ncbi.nlm.nih.gov/22550399/}
 }
 \author{
   P. Roebuck \email{paul_roebuck@comcast.net},
