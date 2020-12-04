@@ -371,11 +371,13 @@ setMethod("paramString", signature(object="RPPASPACESettings"),
           sprintf("fitparams:\n%s\n", indent(fitparams)),
           sprintf("normparams:\n%s\n", indent(normparams)),
           sprintf("onlynormqcgood: %s\n", object@onlynormqcgood),
-		  sprintf("warningsFileName: %s\n", shQuote(object@warningsFileName)),
 		  sprintf("parallelClusterSize: %s\n", shQuote(object@parallelClusterSize)),
+		  sprintf("createoutputjpg: %s\n", object@createoutputjpg),
+		  sprintf("imageextension: %s\n", shQuote(object@imageextension)),
 		  sprintf("imagerotation: %s\n", shQuote(object@imagerotation)),
 		  sprintf("residualsrotation: %s\n", shQuote(object@residualsrotation)),
-		  sprintf("imageextension: %s\n", shQuote(object@imageextension)),
+		  sprintf("warningsFileName: %s\n", shQuote(object@warningsFileName)),
+		  sprintf("errorsFileName: %s\n", shQuote(object@errorsFileName)),
           sep="")
 })
 

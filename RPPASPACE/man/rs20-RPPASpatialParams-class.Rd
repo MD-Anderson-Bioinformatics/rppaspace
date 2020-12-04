@@ -87,7 +87,10 @@ is.RPPASpatialParams(x)
 }
 \examples{
 showClass("RPPASpatialParams")
-spatialparams <- RPPASpatialParams()
+spatialparams <- RPPASpatialParams(cutoff=0.8,
+								   k=100,
+								   gamma=0.1,
+								   plotSurface=FALSE)
 paramString(spatialparams)
 }
 \keyword{classes}

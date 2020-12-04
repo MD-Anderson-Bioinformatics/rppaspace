@@ -67,10 +67,6 @@ is.Directory(x)
 \seealso{
   \code{\link[methods]{as}}
 }
-\examples{
-  pkgdir <- Directory(system.file(package="RPPASPACE"))
-  pkgdir.path <- as(pkgdir, "character")
-}
 \keyword{classes}
 \keyword{file}
 \keyword{methods}

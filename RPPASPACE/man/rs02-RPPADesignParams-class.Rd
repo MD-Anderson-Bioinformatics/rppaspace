@@ -83,6 +83,13 @@ is.RPPADesignParams(x)
 \seealso{
   \code{\linkS4class{RPPA}}
 }
+\examples{
+showClass("RPPADesignParams")
+designparams <- designparams <- RPPADesignParams(center=FALSE,
+								 seriesToIgnore=list()
+								 )
+paramString(designparams)
+}
 
 \keyword{classes}
 \keyword{regression}

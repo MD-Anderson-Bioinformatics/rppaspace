@@ -46,17 +46,25 @@ registerNormalizationMethod(key, method, ui.label=names(key))
 }
 \examples{
   \dontrun{
+## Not run due to lack of capability to unregister methods
 ## Create new normalization method
-normalize.foo <- function(concs, bar) {
+normalize.testNorm <- function(concs, bar) {
     return(normconcs <- concs - bar)
 }
 
 ## Register normalization method to enable its use by package
-registerNormalizationMethod("foo", normalize.foo, "Foo is as foo does")
+registerNormalizationMethod("testNorm", normalize.testNorm, "Registered Test Normalization Class")
 
 ## Use it...
 concs <- matrix(runif(500), nrow=10)
-normalize(concs, method="foo", bar=0.005)
+normalize(concs, method="testNorm", bar=0.005)
+
+## Show all registered fit models
+sapply(getRegisteredNormalizationMethodKeys(),
+       function(key) {
+           c(key = key,
+             label=getRegisteredNormalizationMethodLabel(key))
+       })
   }
 }
 \keyword{data}

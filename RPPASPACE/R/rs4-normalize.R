@@ -11,6 +11,12 @@
 .NormEnv <- new.env(hash=TRUE)                   # Private environment
 attr(.NormEnv, "name") <- "RPPASPACENormalizationMethods"
 
+##-----------------------------------------------------------------------------
+## Returns private environment for storing registered normalization methods
+normenv <- function() {
+    return(.NormEnv)
+}
+
 
 ##=============================================================================
 setClass("RPPANormalizationParams",
@@ -109,11 +115,6 @@ setMethod("paramString", signature(object="RPPANormalizationParams"),
 ## Private Methods
 ##
 
-##-----------------------------------------------------------------------------
-## Returns private environment for storing registered normalization methods
-normenv <- function() {
-    .NormEnv
-}
 
 
 ##-----------------------------------------------------------------------------

@@ -44,6 +44,25 @@ registerModel(key, classname, ui.label=names(key))
   \code{\link{getRegisteredObjectKeys}},
   \code{\link{registerClassname}}
 }
+\examples{
+## Create new (but nonfunctional) fit model
+## Not run due to lack of capability to unregister class
+  \dontrun{
+setClass("TestFitClass",
+         representation("FitClass",
+                        testfit="character"),
+         prototype(testfit="TestFitClass"))
 
+## Register fit model to enable its use by package
+registerModel("testfit", "TestFitClass", "Registered Test Fit Class")
+
+## Show all registered fit models
+sapply(getRegisteredModelKeys(),
+       function(key) {
+           c(model=getRegisteredModel(key),
+             label=getRegisteredModelLabel(key))
+       })
+   }
+}
 \keyword{data}
 

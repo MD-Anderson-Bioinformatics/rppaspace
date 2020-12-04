@@ -205,7 +205,18 @@ is.RPPAFitParams(x)
   \code{\link{RPPA}},
   \code{\link{RPPADesignParams}}
 }
-
+\examples{
+showClass("RPPAFitParams")
+fitparams <- RPPAFitParams(measure="Net.Value",
+						   method="nls",
+						   model="cobs",
+						   trim=2,
+						   ci=FALSE,
+						   ignoreNegative=FALSE,
+						   warnLevel=-1
+						   )
+paramString(fitparams)
+}
 \keyword{classes}
 \keyword{models}
 \keyword{nonlinear}
