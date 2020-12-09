@@ -85,12 +85,6 @@
 \value{
   The \code{fitted} method returns a numeric vector.
 }
-\references{
-  Hu J, He X, Baggerly KA, Coombes KR, Hennessy BT, Mills GB.\cr
-  "Non-parametric Quantification of Protein Lysate Arrays"\cr
-  Bioinformatics (2007) 23(15): 1986-1994.\cr
-  \url{https://academic.oup.com/bioinformatics/article/23/15/1986/205819}
-}
 \author{
   P. Roebuck \email{paul_roebuck@comcast.net},
   James M. Melott \email{jmmelott@mdanderson.org}

@@ -51,12 +51,6 @@
 \value{
   Returns normalized concentrations as matrix appropriately annotated.
 }
-\references{
-  Neeley ES, Kornblau SM, Coombes KR, Baggerly KA.\cr
-  \emph{Variable slope normalization of reverse phase protein arrays}\cr
-  Bioinformatics (2009) 25(11): 1384-1389.\cr
-  \url{https://academic.oup.com/bioinformatics/article/25/11/1384/331482}
-}
 \author{
   P. Roebuck \email{paul_roebuck@comcast.net},
   E. Shannon Neeley \email{sneeley@stat.byu.edu},

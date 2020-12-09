@@ -2,15 +2,9 @@
 ### $Id: bisection.search.R
 ###
 ### fields, Tools for spatial data
-### Copyright 2004-2007, Institute for Mathematics Applied Geosciences
+### Copyright 2004-2020, Institute for Mathematics Applied Geosciences
 ### University Corporation for Atmospheric Research
 ### Used with permission of Doug Nychka under Artistic license (2008)
-
-## :KRC: Should this be placed as an internal function inside the
-## .generic.trim function that is the only thing that ever uses it.
-
-## What does this function do?
-## What do the inputs mean?
 
 ##-----------------------------------------------------------------------------
 "bisection.search" <-
