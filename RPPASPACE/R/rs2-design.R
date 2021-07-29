@@ -8,7 +8,9 @@ setClassUnion("OptionalFilename", c("character", "NULL"))
 setClassUnion("OptionalList", c("list", "NULL"))
 setClass("RPPADesignParams",
          representation(center="logical",
-                        seriesToIgnore="OptionalList"
+                        seriesToIgnore="OptionalList",
+						majorXDivisions="integer",
+						majorYDivisions="integer"
 						))
 
 
@@ -20,10 +22,12 @@ is.RPPADesignParams <- function(x) {
 
 ##-----------------------------------------------------------------------------
 RPPADesignParams <- function(
-                             center=FALSE,
-                             seriesToIgnore=NULL
-							 ) {
-
+							center=FALSE,
+							seriesToIgnore=NULL,
+							majorXDivisions=as.integer(NA),
+							majorYDivisions=as.integer(NA)
+							) 
+{
 	## Check arguments
  
     ## Convert numeric argument to logical counterpart
@@ -40,8 +44,10 @@ RPPADesignParams <- function(
 
     ## Create new class
     new("RPPADesignParams",
-        center=center,
-        seriesToIgnore=seriesToIgnore
+		center=center,
+		seriesToIgnore=seriesToIgnore,
+		majorXDivisions=majorXDivisions,
+		majorYDivisions=majorYDivisions		
 		)
 }
 
@@ -59,12 +65,13 @@ setMethod("paramString", signature(object="RPPADesignParams"),
     ## :TODO: Implementation currently ignores the 'slots' argument
     ## and returns string containing parameters from various slots
     ## as though:
-    ##     slotsToDisplay <- c("center", "seriesToIgnore", "dilutionsInSeries")
+    ##     slotsToDisplay <- c("center", "seriesToIgnore", "majorXDivisions", "majorYDivisions")
     ##     paramString(dp, slotsToDisplay)
     ##
     paste(paste("center:", object@center), "\n",
           paste("seriesToIgnore:", shQuote(object@seriesToIgnore)), "\n",
-          #paste("dilutionsInSeries:", shQuote(object@dilutionsInSeries)), "\n",
+          paste("majorXDivisions:", shQuote(object@majorXDivisions)), "\n",
+          paste("majorYDivisions:", shQuote(object@majorYDivisions)), "\n",
           sep="")
 })
 

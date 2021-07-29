@@ -1,6 +1,20 @@
 
 	**************************************************
 	*						 *
+	*	       1.0.8 SERIES NEWS			 *
+	*						 *
+	**************************************************
+
+		CHANGES IN R VERSION 1.0.8
+
+		o	R2 PNG image showing residuals updated.
+		o	JPEG Graphics output rewritten to use updated PNG file.
+		o	JPEG oriention of slides vs PNGs change based on longer dimension of slide image.
+
+
+
+	**************************************************
+	*						 *
 	*	       1.0.4 SERIES NEWS			 *
 	*						 *
 	**************************************************

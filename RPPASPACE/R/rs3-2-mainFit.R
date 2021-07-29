@@ -78,7 +78,8 @@ RPPAFit <- function(rppa,
                     trace=FALSE,
                     verbose=FALSE,
                     veryVerbose=FALSE,
-                    warnLevel=0) {
+					warnLevel=0,
+                    residualsrotation=as.integer(0)) {
     ## Check arguments
     ## [1] 'rppa' is checked in the call to RPPAFitFromParams
     ## [2] Everything else is checked in RPPAFitParams
@@ -92,7 +93,8 @@ RPPAFit <- function(rppa,
                             trace,
                             verbose,
                             veryVerbose,
-                            warnLevel)
+							warnLevel,
+                            residualsrotation)
     RPPAFitFromParams(rppa, params)
 }
 
@@ -109,7 +111,8 @@ RPPAFitParams <- function(measure,
                           trace=FALSE,
                           verbose=FALSE,
                           veryVerbose=FALSE,
-                          warnLevel=0) {
+                          warnLevel=0,
+						  residualsrotation=as.integer(0)) {
     ## Check arguments
   
     ## Start with the critical parameter, 'model', since it tells us which
@@ -617,6 +620,7 @@ RPPAFitFromParams <- function(rppa,
                   conf.width=0,
 				  noise=noise.calc,
                   warn=warn2,
+				  residualsrotation=fitparams@residualsrotation,
                   version=packageDescription("RPPASPACE", fields="Version"))
 	  if (trim > 0) {
         if (verbose) {

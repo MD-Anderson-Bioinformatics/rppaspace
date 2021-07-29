@@ -18,8 +18,9 @@ setClass("RPPAFit",
                         intensities="numeric",    ## intensities related to series concentrations
                         ss.ratio="numeric",
 						noise="numeric",
-                        warn="character",
-                        version="character"))
+                        warn="character",						
+                        version="character",
+						residualsrotation="integer"))
 
 
 ##=============================================================================
@@ -38,7 +39,9 @@ setClass("RPPAFitParams",
                         veryVerbose="logical",
                         warnLevel="numeric",
                         trim="numeric",
-                        model="character"))
+                        model="character",
+					    residualsrotation="integer"
+						))
 
 
 ##-----------------------------------------------------------------------------
@@ -71,6 +74,7 @@ setMethod("summary", signature(object="RPPAFit"),
     invisible(NULL)
 })
 
+##-----------------------------------------------------------------------------
 rotateMatrix  <- function(x, clockwise = T) 
 {
 	if (clockwise) 
@@ -83,6 +87,7 @@ rotateMatrix  <- function(x, clockwise = T)
 	} 
 }
 
+##-----------------------------------------------------------------------------
 rotateMatrixRight <- function(m, numRots = c(0,1,2,3)) 
 {
 	#numRots
@@ -93,12 +98,14 @@ rotateMatrixRight <- function(m, numRots = c(0,1,2,3))
 	return (switch(numRots+1, m, rotateMatrix(m), rotateMatrix(rotateMatrix(m)), rotateMatrix(m,FALSE)))
 }
 
+
 ##-----------------------------------------------------------------------------
 ## Provides a geographic plot of some measure computed from the fit.
 ## Default is to image the (raw) residuals, with options for other forms
 ## of the residuals or for the fitted concentrations (X) or intensities (Y).
 setMethod("image", signature(x="RPPAFit"),
           function(x,
+				   residualsrotation=as.integer(0),
                    measure=c("Residuals",
                              "ResidualsR2",
                              "StdRes",
@@ -120,10 +127,13 @@ setMethod("image", signature(x="RPPAFit"),
                                    Y=fitted(x, "Y"),
                                    stop(sprintf("unrecognized measure %s",
                                                 sQuote(measure))))
+												
+	#if(is.na(residualsrotation)) {print("residualsrotation is NA")}
 
     ## Image the residuals
     imageRPPA <- getMethod("image", class(rppa))
     imageRPPA(rppa,
+			  rot=residualsrotation,
               measure=measure,
               main=main,
               ...)
@@ -309,9 +319,9 @@ setMethod("plot", signature(x="RPPAFit", y="missing"),
                              ", Min / Max Valid Conc. =",
                              round(low, 2),
                              "/",
-                             round(high, 2))
+                             round(high, 2), "\n  " )
             ## :TODO: add 'autosub' to dots and remove one of these plot calls
-#browser()
+
 			miny <- min(yraw)
 			#if (miny < -65535) miny <- -65535
 			maxy <- max(yraw)

@@ -15,7 +15,11 @@
 }
 \usage{
 
-RPPADesignParams(center = FALSE, seriesToIgnore = NULL )
+RPPADesignParams(
+	center = FALSE, 
+	seriesToIgnore = NULL, 
+	majorXDivisions=as.integer(NA), 
+	majorYDivisions=as.integer(NA))
 
 is.RPPADesignParams(x)
 \S4method{paramString}{RPPADesignParams}(object, slots, \dots)
@@ -27,6 +31,10 @@ is.RPPADesignParams(x)
   \item{x}{object of class \code{RPPADesignParams} (or \code{RPPA} in plot method)}
   \item{seriesToIgnore}{object of class \code{list} or \code{NULL} where list members 
 	are numeric Series.Id values to ignore when fitting the data to a curve.}
+  \item{majorXDivisions}{integer to describe distance between grid lines on the X axis 
+	of the R2 residuals plot.  Defaults to 10 if NA or invalid value provided.}
+  \item{majorYDivisions}{integer to describe distance between grid lines on the Y axis 
+	of the R2 residuals plot.  Defaults to 10 if NA or invalid value provided.}
   \item{object}{object of class \code{RPPADesignParams} in \code{paramString} method}
   \item{slots}{strings specifying \code{RPPADesignParams} slotnames to display
     (for debugging)}
@@ -51,6 +59,8 @@ is.RPPADesignParams(x)
   \describe{
     \item{\code{center}:}{see corresponding argument above}
     \item{\code{seriesToIgnore}:}{see corresponding argument above}
+    \item{\code{majorXDivisions}:}{see corresponding argument above}
+    \item{\code{majorYDivisions}:}{see corresponding argument above}
   }
 }
 \section{Methods}{
@@ -86,7 +96,9 @@ is.RPPADesignParams(x)
 \examples{
 showClass("RPPADesignParams")
 designparams <- designparams <- RPPADesignParams(center=FALSE,
-								 seriesToIgnore=list()
+								 seriesToIgnore=list(),
+								 majorXDivisions = as.integer(11),
+								 majorYDivisions = as.integer(11)
 								 )
 paramString(designparams)
 }

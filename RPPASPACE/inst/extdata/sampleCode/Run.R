@@ -1,5 +1,5 @@
 #analysishome <- [Insert directory here]
-analysishome <- "E:/work/SuperCurve/RPPASPACE/inst/extdata"
+analysishome <- "c:/work/RPPA/RPPASPACE/inst/extdata"
 
 ## Pathnames (preferred layout)
 txtdir <- file.path(analysishome, "txt" )

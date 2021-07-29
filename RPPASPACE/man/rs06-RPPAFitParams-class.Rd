@@ -31,19 +31,23 @@ RPPAFit(rppa,
         trace=FALSE,
         verbose=FALSE,
         veryVerbose=FALSE,
-        warnLevel=0)
+        warnLevel=0,
+		residualsrotation = as.integer(0)
+		)
 
-RPPAFitParams(measure,
-              model="logistic",
-              xform=NULL,
-              method=c("nls", "nlrob", "nlrq"),
-              trim=2,
-              ci=FALSE,
-              ignoreNegative=TRUE,
-              trace=FALSE,
-              verbose=FALSE,
-              veryVerbose=FALSE,
-              warnLevel=0)
+RPPAFitParams(  measure,
+				model="logistic",
+				xform=NULL,
+				method=c("nls", "nlrob", "nlrq"),
+				trim=2,
+				ci=FALSE,
+				ignoreNegative=TRUE,
+				trace=FALSE,
+				verbose=FALSE,
+				veryVerbose=FALSE,
+				warnLevel=0,
+				residualsrotation = as.integer(0)
+			)
 
 RPPAFitFromParams(rppa,
                   fitparams,
@@ -106,6 +110,10 @@ is.RPPAFitParams(x)
     won't cause failure but will give us a chance to figure out which dilution
     series are failing. Setting \code{warnLevel} to two or greater may change
     the values returned.}
+  \item{residualsrotation}{numeric scalar containing 90 degree value to rotate 
+	the generated residuals image by when generating the output graphic.  
+	This should be used if the layout of the information in the input txt 
+	file does not match the orientation of the slide input image.}
   \item{object}{object of class \code{RPPAFitParams}}
   \item{x}{object of class \code{RPPAFit} (or \code{RPPAFitParams})}
   \item{slots}{strings specifying \code{RPPAFitParams} slotnames to display
@@ -164,6 +172,7 @@ is.RPPAFitParams(x)
     \item{\code{warnLevel}:}{numeric; see arguments above}
     \item{\code{trim}:}{numeric; see arguments above}
     \item{\code{model}:}{character; see arguments above}
+    \item{\code{residualsrotation}:}{numeric; see arguments above}
   }
 }
 \section{Methods}{

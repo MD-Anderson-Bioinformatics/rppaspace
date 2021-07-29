@@ -237,6 +237,7 @@ setMethod("summary", signature(object="RPPA"),
 ##-----------------------------------------------------------------------------
 setMethod("image", signature(x="RPPA"),
           function(x,
+                   rot=as.integer(0),
                    measure="Net.Value",
                    main=.mkPlotTitle(measure, x@antibody),
                    colorbar=FALSE,
@@ -281,13 +282,37 @@ setMethod("image", signature(x="RPPA"),
     dim.rppa <- dim(x)
     my <- dim.rppa["Main.Row"] * dim.rppa["Sub.Row"]
     mx <- dim.rppa["Main.Col"] * dim.rppa["Sub.Col"]
-
     yspot <- 1 + my - (max(data.df$Sub.Row)*(data.df$Main.Row-1) + data.df$Sub.Row)
     xspot <- max(data.df$Sub.Col)*(data.df$Main.Col-1) + data.df$Sub.Col
 
     geo <- tapply(data.df[, measure],
                   list(xspot, yspot),
                   mean)
+
+	if (rot == as.integer(90)) 
+	{
+		geo <- rotateMatrixClockwise90Degrees(geo, 1)
+		temp <- my
+		my <- mx
+		mx <- temp
+		temp <- yspot
+		yspot <- xspot
+		xspot <- temp
+	}
+	if (rot == as.integer(180)) 
+	{
+		geo <- rotateMatrixClockwise90Degrees(geo, 2)
+	}
+	if (rot == as.integer(270)) 
+	{
+		geo <- rotateMatrixClockwise90Degrees(geo, 3)
+		temp <- my
+		my <- mx
+		mx <- temp
+		temp <- yspot
+		yspot <- xspot
+		xspot <- temp
+	}
 
     if (colorbar) {
         ## Get the size of the plotting region in relative units
@@ -338,9 +363,9 @@ setMethod("image", signature(x="RPPA"),
           col=col,
           main=main,
           sub=paste("File:", x@file),
-          xaxt="n",
+          xaxt="n", #Supress plotting of x-axis
           xlab="",
-          yaxt="n",
+          yaxt="n", #Supress plotting of y-axis
           ylab="",
           ...)
 
@@ -355,6 +380,14 @@ setMethod("image", signature(x="RPPA"),
 
     abline(h=(0.5 + seq(0, my, length=1+dim.rppa["Main.Row"])))
     abline(v=(0.5 + seq(0, mx, length=1+dim.rppa["Main.Col"])))
+
+	bv <- c(0:11)
+	vlines <- c(5+11*bv,10+11*bv,11+11*bv)
+	bh <- c(0:4)
+	hlines <- c(5+bh*11,6+bh*11,11+bh*11)
+	
+	abline(v=(0.5 + vlines), col="green")
+	abline(h=(0.5 + hlines), col="green")
 
     invisible(x)
 })

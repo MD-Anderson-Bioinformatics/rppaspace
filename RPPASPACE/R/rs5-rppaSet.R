@@ -18,6 +18,7 @@ setClass("RPPASet",
                         completed="matrix",          ## what worked/failed
                         normparams="RPPANormalizationParams",
                         version="character",
+						residualsrotation="integer",
 						warningsFileName="character",
 						errorsFileName="character"						
 						))        ## package version
@@ -28,12 +29,395 @@ is.RPPASet <- function(x) {
     is(x, "RPPASet")
 }
 
+##-----------------------------------------------------------------------------
+## Method to rotate a matrix 90 degrees, by default clockwise.
+rotateMatrix  <- function(x, clockwise = T) 
+{
+	if (clockwise) 
+	{ 
+		t( apply(x, 2, rev))
+	} 
+	else 
+	{
+		apply( t(x),2, rev)
+	} 
+}
+
+##-----------------------------------------------------------------------------
+## Method to rotate a matrix numRots increments x 90 degrees clockwise.
+rotateMatrixClockwise90Degrees <- function(m, numRots = c(0,1,2,3)) 
+{
+	#numRots
+	# 0: 0 degree rotation, return original matrix 
+	# 1: 90 degree rotation, rotate matrix clockwise once
+	# 2: 180 degree rotation, rotate matrix clockwise twice
+	# 3: 270 degree rotation, rotate matrix counterclockwise once
+	return (switch(numRots+1, m, rotateMatrix(m), rotateMatrix(rotateMatrix(m)), rotateMatrix(m,FALSE)))
+}
+
+##-----------------------------------------------------------------------------
+## Create the fit graphs and save them as PNG files
+
+createResidualsPNG <- function (
+	topPlotFileName,
+	outputfilename,
+	measure,
+	antibody,
+	m,
+	majorxpoints = as.integer(NA),
+	majorypoints = as.integer(NA),
+	plotcolors = NA,
+	missingvaluecolor = "#AAAAAA",
+	gridcolor = "black",
+	colorlegend = FALSE,
+	cellsize = 3,
+	rotation
+	) 
+{
+	#---------------------------------------------
+	#Setup for matrix colors
+	#---------------------------------------------
+	#Set up where breaks between colors should be.
+	#10 color breaks with 11 color values over range from .4 to 1.
+	
+	#Set default Red-Yellow-Green color range if no color range was specified
+	if (anyNA(plotcolors)) 
+	{
+		#Colors to use for rectangles in plot 
+		#Go from Red (.4) to Yellow (.7) to Green (1.0)
+		RYG <- c("#A50026", #Red
+				 "#D73027",
+				 "#F46D43",
+				 "#FDAE61",
+				 "#FEE066", 
+				 "#FFFF88", #Yellow
+				 "#D9EF88",
+				 "#A6D96A",
+				 "#66BD63",
+				 "#1A9850",
+				 "#006837"  #Green
+				 ) 
+				 
+		plotcolors <- RYG 	
+	}
+	
+	numcolors <- length(plotcolors)
+	mincolorvalue <- .39999999999
+	rangeofvalues <- 1 - mincolorvalue  
+	breakpoints <- mincolorvalue + (0:(numcolors-1))/(numcolors/rangeofvalues)
+	
+	if (colorlegend) 
+	{
+		nacolorbarheight <- 12
+		nacolordivider <- 10
+		colorbarxsize <- 40
+		colorbarysize <- as.integer(256/numcolors) * numcolors 
+		if (colorbarysize / numcolors > 12)
+		{
+			colorbarysize <- 12 * numcolors 
+		}
+		colorbartotalheight <- colorbarysize + nacolordivider + nacolorbarheight
+	}
+
+	#Apply requested rotations to data values and switch grid labels as needed
+	if (rotation == as.integer(90)) 
+	{
+		m <- rotateMatrixClockwise90Degrees(m, 1)
+		
+		temp <- majorxpoints
+		majorxpoints <- majorypoints
+		majorypoints <- temp
+	} 
+	else if (rotation == as.integer(180)) 
+	{
+		m <- rotateMatrixClockwise90Degrees(m, 2)
+	} 
+	else if (rotation == as.integer(270))
+	{
+		m <- rotateMatrixClockwise90Degrees(m, 3)
+		
+		temp <- majorxpoints
+		majorxpoints <- majorypoints
+		majorypoints <- temp
+	}
+
+	values <- as.vector(m)
+	xpoints <- ncol(m)
+	ypoints <- nrow(m)
+
+	# Make matrices to plot series of rectangles based on number of x and y elements
+	# times the sizes of the cells. This calculates the left (mxl) and bottom (myb)
+	# coordinates of each rectangle to plot.
+	mxl <- matrix(rep(0:(xpoints-1) * cellsize, ypoints), ncol=xpoints, nrow=ypoints, byrow=TRUE)
+	myb <- matrix(rep(0:(ypoints-1) * cellsize, xpoints), ncol=xpoints, nrow=ypoints, byrow=FALSE)
+	
+	#Set index values for all colors in data matrix for slide RR2 values
+	colindex <- as.integer(cut(as.array(m), breaks=c( unlist(breakpoints), 1)))
+	#Color all blocks according to color scale adjusted from .4 to 1
+	gcolors <- plotcolors[colindex]
+
+	#Color all NA (missing) values gray.
+	gcolors[is.na(gcolors)] <- missingvaluecolor
+
+	#Base x grid labels off x major grid sections
+	#gridxlabels <- (0:majorxpoints) * as.integer(xpoints/majorxpoints)
+	gridxlabels <- (0:as.integer(xpoints/majorxpoints)) * majorxpoints
+	
+	#Base y grid labels off y major grid sections
+	#If y grid labels are defined, attempt to use those, otherwise base them off y major grid sections
+	#gridylabels <- ((majorypoints:0) * as.integer(ypoints/majorypoints))
+	gridylabels <- ((as.integer(ypoints/majorypoints):0) * majorypoints)
+
+	#Calculate how much to adjust grid locations to move each one a 2 pixels from axis per grid line > 0
+	gridxadjust <- (0:(length(gridxlabels)-1)) * 2
+	#if (min(gridxlabels) > 0) gridxadjust <- gridxadjust + 1
+	gridyadjust <- ((length(gridylabels)-1):0) * 2
+	#if (min(gridylabels) > 0) gridyadjust <- gridyadjust + 1
+
+	#Set the pixel locations on grid for axis tick marks
+	gridxlocs <- as.integer(gridxlabels * cellsize + gridxadjust - cellsize/2) + 1
+	gridylocs <- as.integer(gridylabels * cellsize + gridyadjust - cellsize/2) + 1
+	
+	#Adjust left and top lines to be at 0 instead 1
+	gridxlocs[1] <- -1
+	gridylocs[length(gridylocs)] <- gridylocs[length(gridylocs)] 
+	
+	#If the last x grid location is not included in the generated locations, then add it.
+	if ((xpoints %% majorxpoints != 0) && (length(gridxlocs) < xpoints + 1))
+	{
+		gridxlocs <- append(gridxlocs, as.integer(xpoints* cellsize + max(gridxadjust) + 1))
+	}
+	#If the last y grid location is not included in the generated locations, then add it.
+	if ((ypoints %% majorypoints != 0) && (length(gridylocs) < ypoints + 1))
+	{
+		gridylocs <- append(gridylocs, as.integer(ypoints * cellsize + max(gridyadjust)))
+	}
+
+	#Adjust x coordinates of boxes by 2 pixels for each grid mark before it
+	for(labloc in 1:length(gridxlabels))
+	{
+		mxl[,(1:xpoints)[(1:xpoints) > gridxlabels[labloc]]] <- mxl[,(1:xpoints)[(1:xpoints) > gridxlabels[labloc]]] + 2
+	}
+	
+	#Adjust x coordinates of boxes by 2 pixels for each grid mark before it
+	for(labloc in 1:length(gridylabels))
+	{
+		myb[(1:ypoints)[(1:ypoints) > gridylabels[labloc]],] <- myb[(1:ypoints)[(1:ypoints) > gridylabels[labloc]],] + 2
+	}
+
+	#Calculate plot dimensions of RSS portion of plot based on size of rectangles and gridlines to be drawn
+	pdlx <- min(mxl) 
+	pdrx <- max(mxl) + cellsize
+	pdby <- min(myb)
+	pdty <- max(myb) + cellsize
+	
+	#Total plot size in pixels
+	rssxsize <- pdrx - pdlx
+	rssysize <- pdty - pdby 
+	
+	#bottom, left, top, right
+	top_image_height <- 320
+	text_height_top <- 20
+	text_height_bottom <- 20
+	margins_all <- 30
+	mar_top <- margins_all + text_height_top + top_image_height
+	mar_left <- margins_all + cellsize
+	mar_bottom <- margins_all
+	mar_right <- margins_all - 5
+
+	pngxsize <- as.integer(rssxsize + mar_left + mar_right)
+	pngysize <- as.integer(rssysize + mar_top + mar_bottom + text_height_bottom)
+
+	#Adjust width to include color legend if it has been included.
+	if (colorlegend)
+	{
+		pngxsize <- pngxsize + colorbarxsize + mar_right
+		pngysize <- as.integer(max(rssysize, colorbarysize) + text_height_bottom + mar_top + mar_bottom)
+	}
+
+	#If width is less than 640 pixels, then increase it to 640 to match with width of other plot.
+	if (pngxsize < 640)
+	{
+		expandx <- 640 - pngxsize
+		pngxsize <- 640
+		mar_left <- mar_left + as.integer((expandx + 1) / 2)
+		mar_right <- mar_right + as.integer(expandx / 2)
+	}
+
+	png(filename=outputfilename, bg="white", width = pngxsize, height = pngysize, type="cairo-png")
+	plot.new()
+
+	viewport(x=unit(mar_left, "native"), y=unit(mar_bottom, "native"))
+
+	grid.raster(readPNG(topPlotFileName), x = unit(0, "native"),  y = unit(0, "native"), just=c("left","top"))
+	
+	grid.rect(
+		x=unit(mxl+mar_left, "native"), 
+		y=unit(myb+mar_top, "native"), 
+		width=unit(cellsize, "native"), 
+		height=unit(cellsize, "native"),
+		gp=gpar(fill=gcolors, col=gcolors, lwd=0, alpha=1)
+	)
+	
+	label_pos <- 1
+
+	for(x_loc in (gridxlocs+mar_left))
+	{
+		grid.lines(x = unit(x_loc, "native"),
+			  y = unit(c(min(gridylocs) + mar_top, max(gridylocs) + mar_top + 5 ), "native"),
+			  arrow = NULL, name = NULL, gp=gpar(col=gridcolor,lwd=unit(2,"native"),lex=1), draw = TRUE)
+
+		if (!is.na(gridxlabels[label_pos]))
+		{
+			grid.text(gridxlabels[label_pos], x = unit(x_loc, "native"), y = unit( max(gridylocs) + mar_top + 10, "native"),
+				just = "top", hjust = NULL, vjust = NULL, rot = 0,
+				check.overlap = FALSE, default.units = "native",
+				name = NULL, gp = gpar(color="black", cex=1, fontfamily="Times"), draw = TRUE)
+		}
+		label_pos <- label_pos + 1
+	}	
+	
+	label_pos <- 1
+	
+	for(y_loc in (gridylocs + mar_top))
+	{
+		grid.lines(y = unit(y_loc, "native"),
+			x = unit(c(min(gridxlocs) + mar_left - 5, max(gridxlocs) + mar_left), "native"),
+			gp=gpar(col=gridcolor, lwd=unit(2,"native"),lex=1), 
+			draw = TRUE
+		)
+
+		if (!is.na(gridylabels[label_pos]))
+		{
+			grid.text(gridylabels[label_pos], x = unit(mar_left - max(c(8,cellsize/2 + 8)), "native"), y = unit(y_loc, "native"),
+				just = "right", rot = 0,
+				check.overlap = FALSE, default.units = "native",
+				gp = gpar(color="black", cex=1, fontfamily="Times"), 
+				draw = TRUE
+			)
+		}
+		
+		label_pos <- label_pos + 1
+	}
+	
+	if (colorlegend) 
+	{
+		cgcellheight <- colorbarysize / numcolors
+		cgcellwidth <- colorbarxsize %/% 2
+
+		cgleft <- pngxsize - mar_right - colorbarxsize
+		cgtop <- mar_top 
+		cgcelltops <- cgtop + cgcellheight * (0:(numcolors-1))
+
+		cggridmarklabels <- c("1.0", "0.9", "0.8", "0.7", "0.6", "0.5", "0.4")
+		cgtextlocsarea <- max(cgcelltops) - min(cgcelltops) + 0 * cgcellheight
+		cgtextdist <- cgtextlocsarea / (length(cggridmarklabels)-1)
+		cgtextylocs <- cgtop + (0:(length(cggridmarklabels)-1)) * cgtextdist + 1
+
+		#Draw color scale grid
+		grid.rect(
+			x=unit(cgleft, "native"), 
+			y=unit(cgcelltops, "native"), 
+			width=unit(cgcellwidth, "native"), 
+			height=unit(cgcellheight, "native"),
+			just=c("left","bottom"),
+			gp=gpar(fill=rev(plotcolors),lwd=0, alpha=1)
+		)
+		
+		#Draw color scale area border
+		grid.rect(
+			x=unit(cgleft, "native"), 
+			y=unit(cgtop, "native"), 
+			width=unit(cgcellwidth, "native"), 
+			height=unit(cgcellheight * numcolors, "native"),
+			just=c("left","bottom"),
+			gp=gpar(fill=NA, col="black", lwd=unit(2,"native"), alpha=1)
+		)
+		
+		#Place color scale ticks and labels
+		for (yloc in cgtextylocs)
+		{
+			grid.lines(
+				x = unit(c(cgleft + colorbarxsize/2,cgleft + colorbarxsize/2 + 5), "native"), 
+				y = unit(c(yloc,yloc), "native"),
+				gp=gpar(col="black", lwd=unit(2,"native"),lex=1),
+				draw = TRUE
+			)
+		}		
+		
+		grid.text(cggridmarklabels, 
+			x = unit(cgleft + colorbarxsize/2 + 8, "native"), 
+			y = unit(cgtextylocs, "native"),
+			just = c("left","centre"), 
+			check.overlap = FALSE, 
+			default.units = "native",
+			gp = gpar(color="black", cex=1, fontfamily="Times"),
+			draw = TRUE
+		)
+		  
+		#Add missing color legend elements
+		grid.rect(
+			x = unit(cgleft, "native"), 
+			y = unit(max(cgcelltops) + cgcellheight + nacolordivider, "native"), 
+			width = unit(cgcellwidth, "native"), 
+			height = unit(nacolorbarheight, "native"),
+			just = c("left","bottom"),
+			gp = gpar(fill=missingvaluecolor, col="black", lwd=unit(2,"native"), alpha=1)
+		)
+		
+		grid.lines(
+			x = unit(c(cgleft + cgcellwidth, cgleft + cgcellwidth + 3), "native"), 
+			y = unit(c(max(cgcelltops) + cgcellheight + nacolordivider + nacolorbarheight/2, 
+				max(cgcelltops) + cgcellheight + nacolordivider + nacolorbarheight/2), "native"), 
+			gp = gpar(col="black", lwd=unit(2,"native"),lex=1), 
+			draw = TRUE
+		)
+
+		grid.text("NA", 
+			x = unit(cgleft + cgcellwidth + 5, "native"), 
+			y = unit(max(cgcelltops) + cgcellheight + nacolordivider + nacolorbarheight/2, "native"),
+			just = c("left","centre"),
+			check.overlap = FALSE, 
+			default.units = "native",
+			gp = gpar(color="black", cex=1, fontfamily="Times"), 
+			draw = TRUE
+		)
+	}
+
+	#Plot title text
+	grid.text(
+		paste(measure, ":", antibody),
+		x = unit(as.integer(pngxsize / 2), "native"), 
+		y = unit(as.integer(mar_top - text_height_top), "native"), 
+		just = c("center","bottom"),
+		default.units = "native",
+		gp = gpar(color="black",  cex=1.2, fontface = "bold", fontfamily="Times"),
+		draw = TRUE)
+
+	#Footer text (file name)
+	grid.text(
+		paste("File:", outputfilename),
+		x = unit(as.integer(pngxsize / 2), "native"), 
+		y = unit(as.integer(pngysize - mar_bottom / 2), "native"), 
+		just = c("center","center"),
+		default.units = "native",
+		gp = gpar(color="black", cex=1, fontfamily="Times"),
+		draw = TRUE)
+	
+	dev.off()
+	
+	return(c(x = pngxsize, y = pngysize))
+}
 
 ##-----------------------------------------------------------------------------
 ## Create the fit graphs and save them as PNG files
 .createFitGraphs <- function(rppaset,
                              path,
-                             prefix) {
+                             prefix,
+							 residualsrotation,
+							 majorXDivisions = rppaset@design@majorXDivisions,
+							 majorYDivisions = rppaset@design@majorYDivisions
+							 ) {
     ## Check arguments
     stopifnot(is.RPPASet(rppaset))
     stopifnot(is.character(path)   && length(path) == 1)
@@ -57,7 +441,8 @@ is.RPPASet <- function(x) {
              "#66BD63",
              "#1A9850",
              "#006837")
-
+			 
+	plotcolors <- RYG
     fitxform <- rppaset@fitparams@xform
     antibodies <- rownames(rppaset@fits)
     for (i in seq_along(antibodies)) {
@@ -70,14 +455,16 @@ is.RPPASet <- function(x) {
 			write(msg, warningsFileName, append=TRUE)
             next
         }
+		measure <- "ResidualsR2"
         main <- .mkPlotTitle(rppafit@measure, antibody)
 
+		#-----------------------------------------------------------------
         ##
         ## First pair of plots
         ##
-        par(bg="white", mfrow=c(2, 1))
+		par(bg="white", mfrow=c(1, 1))
         ## Plot sigmoid curve graph
-
+		#Write it to a temporary file to be added to the later plot.
         tryCatch(plot(rppafit,
                       main=main,
                       xform=fitxform,
@@ -89,33 +476,82 @@ is.RPPASet <- function(x) {
                     warning(conditionMessage(e), immediate.=TRUE)
                  })
 
-		## Image of RSS
-        ## Mark R^2 <= 0.4 as red.
-        imageRPPAFit <- getMethod("image", class(rppafit))
-        tryCatch(imageRPPAFit(rppafit,
-                              col=RYG,
-                              measure="ResidualsR2",
-                              zlim=c(0.4, 1)),
-                 error=function(e) {
-					msg <- paste("Slide ", i, " (", antibody, ") unable to plot RSS image due to following issue:", conditionMessage(e), sep="")
-					write(msg, warningsFileName, append=TRUE)
-                    message(sprintf("cannot plot RSS image for %s", antibody))
-                    warning(conditionMessage(e), immediate.=TRUE)
-                 })
-
-        filename <- sprintf("%s_%s_1.png", prefix, antibody)
+        topPlotFileName <- sprintf("temp_%s_%s_1.png", prefix, antibody)
+        outputfilename <- sprintf("%s_%s_1.png", prefix, antibody)
         dev.copy(png,
-                 file.path(path, .portableFilename(filename)),
+                 file.path(path, .portableFilename(topPlotFileName)),
                  width=640,
-                 height=640)
+                 height=320)
+		dev.off()
+
+		rppa <- rppafit@rppa
+		residualData <- residuals(rppafit, "r2")
+
+		## Begin processing
+		dim.rppa <- dim(rppa)
+		
+		mx <- max(rppa@data$Main.Col) * max(rppa@data$Sub.Col)
+		my <- max(rppa@data$Main.Row) * max(rppa@data$Sub.Row)
+			
+		m <- matrix(residualData, ncol=mx, nrow=my, byrow=TRUE)
+
+		if (is.na(majorXDivisions))
+		{
+			majorxpoints <- dim.rppa["Main.Col"]
+		}
+		else
+		{
+			majorxpoints <- majorXDivisions
+		}
+		
+		if (majorxpoints <= 1)
+		{
+			warning(paste("Invalid majorXDivisions setting:", majorxpoints, ". Defaulting to value of 10."))
+			majorxpoints <- 10
+		}
+		
+		if (is.na(majorYDivisions))
+		{
+			majorypoints <- dim.rppa["Main.Row"]
+		}
+		else
+		{
+			majorypoints <- majorYDivisions
+		}
+		
+		if (majorypoints <= 1)
+		{
+			warning(paste("Invalid majorYDivisions setting:", majorypoints, "Defaulting to value of 10."))
+			majorypoints <- 10
+		}
+		
+		residualsPlotDimensions <- 
+			createResidualsPNG(
+				file.path(path, .portableFilename(topPlotFileName)),
+				outputfilename,
+				measure,
+				antibody,
+				m,
+				majorxpoints,
+				majorypoints,
+				plotcolors,
+				missingvaluecolor = "#AAAAAA",
+				gridcolor = "black",
+				colorlegend = TRUE,
+				cellsize = 3,
+				rotation = residualsrotation
+			)
+
+		#Remove the temporary file produced for the top plot.
+		file.remove(topPlotFileName)
         dev.off()
         dev.set(fitdev)
 
+		#-----------------------------------------------------------------
         ##
         ## Second pair of plots
         ##
-        par(bg="white",
-            mfrow=c(2, 1))
+        par(bg="white", mfrow=c(2, 1))
 
         ## Plot residuals graph
         tryCatch(plot(rppafit,
@@ -151,6 +587,8 @@ is.RPPASet <- function(x) {
         dev.off()
         dev.set(fitdev)
     }
+	
+	return(c(plot_1=residualsPlotDimensions, plot_2 = c(x=640,y=640)))
 }
 
 
@@ -170,7 +608,9 @@ is.RPPASet <- function(x) {
                                  outputdir,
                                  slideImageName,
 								 slideImageRotation = 0,
-								 missingSlide = FALSE
+								 missingSlide = FALSE,
+								 #dimensions of two graphs already written to disk
+								 graphDimensions = c(plot_1 = c(x=0, y=0), plot_2 = c(x=0, y=0))  
 								 ) {
     ## Check arguments
     stopifnot(is.character(antibody)  && length(antibody) == 1)
@@ -209,7 +649,6 @@ is.RPPASet <- function(x) {
 	lenSlideImageName = nchar(slideImageName)
 
 	if (missingSlide == FALSE && (substr(slideImageName, lenSlideImageName - 3, lenSlideImageName) %in% c(".tif", "tiff"))) {
-		print(1)
 		img <- readTIFF(slideImageName, native=TRUE)
 		writeJPEG(img, target=tempImageName, quality=1)
 		slideImage <- load.image(tempImageName)
@@ -217,6 +656,19 @@ is.RPPASet <- function(x) {
 	} else {
 		#Load the slide Image file
 		slideImage <- load.image(slideImageName)
+	}
+
+	#Get image heights and widths
+	slideWidth <- dim(slideImage)[1]
+	slideHeight <- dim(slideImage)[2]
+
+	minDim <- min(slideWidth, slideHeight)
+	if (minDim > 640)
+	{
+		slideImage <- imresize(slideImage, scale = 640 / minDim, interpolation = 6)
+		#Get new image heights and widths
+		slideWidth <- dim(slideImage)[1]
+		slideHeight <- dim(slideImage)[2]
 	}
 
 	#Rotate slide image if requested
@@ -229,43 +681,64 @@ is.RPPASet <- function(x) {
 		slideImage <- add.color(slideImage)
 	}
 
-	#Load the pngs test the height to see which is taller
-	#Expected to be the same height, 640 pixels.
-	png1 <- load.image(pg1)
-	png2 <- load.image(pg2)
-	maxPngHeight <- max(dim(png1)[1], dim(png2)[1])
+	#Get image heights and widths
+	slideWidth <- dim(slideImage)[1]
+	slideHeight <- dim(slideImage)[2]
 
-	#Scale the pngs in both dimensions equally to be the same height as the tif 
-	#if they are shorter so they will take up as much space vertically 
-	#in the output image as the input tif image does.
-	width <- dim(slideImage)[1]
-	slideImageHeight <- dim(slideImage)[2]
-	pngs <- imappend(list(as.cimg(png1),as.cimg(png2)), "x")
-	rm("png1", "png2")
-	pngsWidth <- dim(pngs)[1]
+	save.image(slideImage, tempImageName)
+	rm(slideImage)
 
-	if (maxPngHeight < slideImageHeight) {
-		#Max new height is minimum of 4 * default size = 2560 or the slide image height
-		scaleFactor <- min(4, slideImageHeight/maxPngHeight)
-		pngs <- imresize(pngs, scale = scaleFactor, interpolation = 3)
-		pngsWidth <- dim(pngs)[1]
-	}
-	pngsHeight <- dim(pngs)[2]
+	png1x <- graphDimensions["plot_1.x"]
+	png1y <- graphDimensions["plot_1.y"]
+	png2x <- graphDimensions["plot_2.x"]
+	png2y <- graphDimensions["plot_2.y"]
 
-	#Append the reloaded tif below the combined png figures
-	outImage <- imappend(list(as.cimg(pngs),as.cimg(slideImage)), "y")
-	rm("pngs", "slideImage")
+	#Determine which slide image dimension is greater, width or height. 
 	
-	#Fill in default black space with white for slide image or figures if different sizes
-	if (width - pngsWidth < 0) {		#scaled pngs image was wider than slide image 
-		outImage[(width + 1):(pngsWidth), (pngsHeight + 1):(pngsHeight + slideImageHeight), 1, 1:3] <- 1.0
-	} else if (width - pngsWidth > 0) { #slide image was wider than scaled pngs image
-		outImage[(pngsWidth + 1):width, 1:pngsHeight, 1, 1:3] <- 1.0
+	if (slideHeight > slideWidth)
+	{
+		orientation <- 1 # alternate layout: graphs left, slide right
+		combinedGraphsWidth <- max(png1x, png2x)
+		combinedGraphsHeight <- png1y + png2y
+		jpgWidth <- combinedGraphsWidth + slideWidth
+		jpgHeight <- max(combinedGraphsHeight, slideHeight)
 	}
-
-	#Save the output image as a jpg
-	save.image(outImage, outputImageName)
-	rm("outImage")
+	else
+	{
+		orientation <- 0 # default layout: graphs top, slide bottom
+		combinedGraphsWidth <- png1x + png2x
+		combinedGraphsHeight <- max(png1y, png2y)
+		jpgWidth <- max(combinedGraphsWidth, slideWidth)
+		jpgHeight <- combinedGraphsHeight + slideHeight
+	}
+	jpeg(filename=outputImageName, bg="white", width = jpgWidth, height = jpgHeight, type="cairo")
+	plot.new()
+	
+	if (orientation == 1)
+	{
+		grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
+			width = unit(png1x, "native"), height = unit(-png1y, "native"))
+			
+		grid.raster(readPNG(pg2), x = unit(0, "native"), y = unit(png1y, "native"), just=c("left","top"), interpolate = FALSE, 
+			width = unit(png2x, "native"), height = unit(-png2y, "native"))
+			
+		grid.raster(readJPEG(tempImageName), x = unit(combinedGraphsWidth, "native"),  y = unit(0, "native"), interpolate = FALSE, 
+			just=c("left","top"), width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
+	}
+	else
+	{
+		grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE, 
+			width = unit(png1x, "native"), height = unit(-png1y, "native"))
+			
+		grid.raster(readPNG(pg2), x = unit(png1x, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
+			width = unit(png2x, "native"), height = unit(-png2y, "native"))
+		
+		grid.raster(readJPEG(tempImageName), x = unit(0, "native"), y = unit(combinedGraphsHeight, "native"), just=c("left","top"), 
+			interpolate=FALSE, width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
+	}
+	dev.off()
+	
+	file.remove(tempImageName)
 
 	rc <- TRUE
 
@@ -375,6 +848,8 @@ setMethod("write.summary", signature(object="RPPASet"),
 				   imageextension=".tif",
 				   imagerotation=as.integer(0),
 				   residualsrotation=as.integer(0),
+				   majorXDivisions=object@design@majorXDivisions,
+				   majorYDivisions=object@design@majorYDivisions,
                    ...) {
     ## Check arguments
     if (!is.character(path)) {
@@ -431,6 +906,7 @@ setMethod("write.summary", signature(object="RPPASet"),
         stop("cannot summarize as no fits were stored")
     }
 
+	graphDimensions <- c(plot_1 = c(x=0, y=0), plot_2 = c(x=0, y=0))
     ## Graph fits, if requested
     if (graphs) {
 		#t <- proc.time()
@@ -439,7 +915,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 
         ## Save fit graphs
         dev.new(title="Fit Graphs")
-        .createFitGraphs(object, path, prefix)
+        graphDimensions <- .createFitGraphs(object, path, prefix, residualsrotation, majorXDivisions, majorYDivisions)
 		#t <- proc.time() - tm
 		#print(paste("Fit graph output time:",t[3]))
 	}
@@ -516,7 +992,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 					#imgfile <- file.path(pkgimgdir, "missing_slide.jpg")
 					imgfile <- file.path(pkgimgdir, paste("missing_slide", ".jpg", sep=""))
 					if (is.na(imgfile) || !file.exists(imgfile)) {
-						print("For some reason it can't find the missing_slide.jpg image file!")
+						print("No slide image was provided and the missing_slide.jpg image file can not be found!")
 					}
 					rotation = imagerotation
 					missingSlide <- TRUE
@@ -525,7 +1001,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 				}
 
 				## Create merged image
-				.mergeGraphsAndImage(antibody, prefix, path, imgfile, rotation, missingSlide)
+				.mergeGraphsAndImage(antibody, prefix, path, imgfile, rotation, missingSlide, graphDimensions)
 				#print(paste("Finished image processing for ", antibody, sep=""))
 			}
 			else {
@@ -536,7 +1012,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 		}
 	    #t <- proc.time() - tm
 		#print(paste("Output jpg creation time:",t[3]))
-		
+
     }
 
     ## Write CSV files
@@ -556,6 +1032,7 @@ RPPASet <- function(path,
                     normparams,
                     doprefitqc=FALSE,
                     parallelClusterSize,
+					residualsrotation=as.integer(0),
 					warningsFileName="warnings.txt",
 					printTimings=TRUE
 					) {
@@ -1033,10 +1510,8 @@ RPPASet <- function(path,
 
     slideNamesSeq <- seq_along(slideFilenames)
 
-	#i <- 0
-	tempfits <- foreach (i=slideNamesSeq, .export=c("dofitSlide")) %dopar% {
-    #tempfits <- foreach (i=slideNamesSeq) %do% {
-		print(i)
+	tempfits <- foreach (i=slideNamesSeq, .export=c("dofitSlide")) %dopar% 
+	{
 		if (!is.null(rppas[[i]])) {
 			tryCatch(
 			{
@@ -1123,7 +1598,9 @@ RPPASet <- function(path,
         fitparams=fitparams,
         normparams=normparams,
         completed=completed,
-        version=packageDescription("RPPASPACE", fields="Version"))
+        version=packageDescription("RPPASPACE", fields="Version"),
+		residualsrotation=residualsrotation
+		)
 }
 
 dofitSlide <- function(antibody, rppa, index, fitparams) {

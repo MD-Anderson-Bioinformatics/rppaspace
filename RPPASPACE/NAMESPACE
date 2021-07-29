@@ -12,6 +12,7 @@ import(methods)
 import(cobs)
 import(grDevices)
 import(utils)
+import(grid)
 importFrom("MASS", rlm)
 importFrom("graphics", hist)
 importFrom("graphics", image)
@@ -21,7 +22,7 @@ importFrom("stats", fitted)
 importFrom("stats", loess)
 importFrom("stats", resid, residuals)
 importFrom("graphics", "abline", "axis", "box", "legend", "lines",
-           "mtext", "par", "points", "rect", "text", "title")
+           "mtext", "par", "points", "rect", "text", "title", "plot.new")
 importFrom("stats", "approx", "cor", "lm", "mad", "median",
            "medpolish", "nls", "nls.control", "predict", "pt",
            "quantile", "rnorm", "sd", "var")

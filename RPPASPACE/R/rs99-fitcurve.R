@@ -28,6 +28,7 @@ fitCurveAndSummarizeFromSettings <- function(settings) {
                         normparams=settings@normparams,
                         doprefitqc=settings@doprefitqc,
                         parallelClusterSize=settings@parallelClusterSize,
+						residualsrotation=settings@residualsrotation,
 						warningsFileName = warningsFileName
 						)
 
@@ -49,16 +50,19 @@ fitCurveAndSummarizeFromSettings <- function(settings) {
     save(rppaset, file=file.path(outdir, rda.filename))
 
     ## Summarize the results
-    temp.summary <- write.summary(rppaset,
-                  path=outdir,
-                  graphs=TRUE,
-				  createoutputjpg=settings@createoutputjpg,
-                  imagedir=imgdir,
-                  onlynormqcgood=settings@onlynormqcgood,
-				  imageextension=settings@imageextension,
-				  imagerotation=settings@imagerotation,
-				  residualsrotation=settings@residualsrotation
-				  )
+    temp.summary <- write.summary(
+						rppaset,
+						path=outdir,
+						graphs=TRUE,
+						createoutputjpg=settings@createoutputjpg,
+						imagedir=imgdir,
+						onlynormqcgood=settings@onlynormqcgood,
+						imageextension=settings@imageextension,
+						imagerotation=settings@imagerotation,
+						residualsrotation=settings@residualsrotation,
+						majorXDivisions = settings@designparams@majorXDivisions,
+						majorYDivisions = settings@designparams@majorYDivisions
+					)
 
 
     return(temp.summary)
