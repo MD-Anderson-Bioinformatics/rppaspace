@@ -1239,10 +1239,11 @@ RPPASet <- function(path,
 			warning(msg)
 			write(msg, warningsFileName, append=TRUE)
 		}
-		
+
         ## Plot the first possible slide as a quick design check
         if (firstGoodSlide)
         {
+			print("Plotting design check graph")
 			dev.new(title="Design Check")
 			plot(rppa,
 			   fitparams@measure)
