@@ -54,7 +54,7 @@ fitCurveAndSummarizeFromSettings <- function(settings) {
 						rppaset,
 						path=outdir,
 						graphs=TRUE,
-						createoutputjpg=settings@createoutputjpg,
+						createcombinedoutputimage=settings@createcombinedoutputimage,
 						imagedir=imgdir,
 						onlynormqcgood=settings@onlynormqcgood,
 						imageextension=settings@imageextension,

@@ -85,6 +85,7 @@ setMethod("plot", signature(x="RPPA"),
                    measure="Net.Value",
                    main="",
                    ...) {
+
     ## Check arguments
     if (!is.character(measure)) {
         stop(sprintf("argument %s must be character",

@@ -153,7 +153,7 @@ Changes were requested that were not compatible with the existing codebase of th
 * Removed dependence of the third-party image processing software product ImageMagick.
 * Improved error handling.  Processing of slide set even if some slides fail rather than stopping on the first error.
 * Improved error reporting. Outputs error and warning files as part of output with more useful error messages for reporting run-time issues.
-* Made creation of output jpg optional and not done by default.
+* Made creation of combined output image optional and not done by default and changed format from jpg to png.
 * Updated documentation and examples.
   
 **Changes Inputs and Outputs:**
@@ -184,7 +184,7 @@ RPPASPACE accepts two types of input data:
 
 * Tab-delimited text files with an extension of ".txt".  (See information on the standard slide format below.) 
 * Optional slide image files in one of the following formats/extensions: ".tif", ".png", ".bmp", ".gif", or ".jpg". 
-It is suggested that there only be one slide per image. If the option for creating combined output jpg files is utilized, the entire image will be appended to graphs created by the RPPASPACE process and output as a single jpg output file.  If an image for a particular slide is not available, then a "missing image" graphic file will be appended to the output jpg image.
+It is suggested that there only be one slide per image. If the option for creating combined output image files is utilized, the entire image will be appended to graphs created by the RPPASPACE process and output as a single png output file.  If an image for a particular slide is not available, then a "missing image" graphic file will be appended to the combined output image.
 
 In addition to the input data, configuration objects will need to be set up to run RPPASPACE.  This configuration will be detailed in a later section.  
   
@@ -230,7 +230,7 @@ Original.Order  | Numeric | The original order of the spots in the source file b
 13)	Each slide may optionally have negative control points or blank spots in the grid.
 14)	If negative controls are included on the slide they will all have a dilution of 0 and a series id of 0.
 15)	If positive controls or noise controls are present on the slide, negative controls must also be present if spatial corrections, pre-fit QC , and/or noise calculations are to be calculated as part of the processing of the slide set.
-16)	If images of the original slides are to be included in the output, all input slide images for a run must be of the same file type (with a common file extension) and stored in the same directory.  Slide file names (excluding the file extension) must match the file names of the slide input text files for the run.  Files not matching one of the slide names will be ignored.  All slide image files are optional.  These will only be used for creating a final output jpg image for each processed slide.  If no image of the designated format is present for a given slide a "missing image" graphic will be included in the final output jpg image.
+16)	If images of the original slides are to be included in the output, all input slide images for a run must be of the same file type (with a common file extension) and stored in the same directory.  Slide file names (excluding the file extension) must match the file names of the slide input text files for the run.  Files not matching one of the slide names will be ignored.  All slide image files are optional.  These will only be used for creating a final combined output image for each processed slide.  If no image of the designated format is present for a given slide a "missing image" graphic will be included in the final combined output image.
 17)	Any spot in the rectangular grid that should always be ignored during processing should be assigned a Spot.Type of "Blank" and should have a dilution of 0 and a Series.Id of 0.  
   
 
@@ -423,7 +423,7 @@ Sample PNG # 1 consists of two graphs. The top graph is a 2 dimension points plo
   
 Sample PNG # 2 also consists of two graphs.  The top graph is a plot of the residuals vs. estimated concentration and can be used to check for heteroscedasticity.  A model of absolute residual values vs. estimated concentration is created to assist in doing a rough check for increasing heteroscedasticity and is displayed as red lines on the graph.  A green horizontal line is drawn through the center of the model points.  The second graph displays a plot for each sample of the difference between adjacent points in a sample dilution versus the average of those two points. Plots of the loess (in red) and selected model (in green), in this example the using the COBS curve fitting method, over the same data are displayed to assist in determining how well the respective models fit the sample data.
 
-If an output jpg file is requested, then a jpg file will also be created for each slide that will be a combination of the two png files and a scaled down version of the original slide image file, if one is provided. The software will search for images in the directory specified by the user in the imgdir parameter of the RPPASPACESettings object specified by the user when running RPPASPACE. The software will search for image files with the extension as specified in the imageextension parameter of the same object.  If no imageextension parameter is provided then the software will default to searching for files with the extension ".tif".  Supported file types and extensions include ".tif", ".png", ".bmp", ".gif", and ".jpg". All image files for a set of slides must be of the same image type with the specified file extension.  The portion of the file name without the file extension will be compared to the antibody names from the input quantification files.   Where there is not an exact match of the file name with the expected image extension, then a default image labeled "missing slide image" will be shown where the scaled slide image would normally appear in the output jpg file.   The output jpg file will be named with the antibody name of the input slide quantification file.
+If a combined output image file is requested, then a png file will also be created for each slide that will be a combination of the two png files and a scaled down version of the original slide image file, if one is provided. The software will search for images in the directory specified by the user in the imgdir parameter of the RPPASPACESettings object specified by the user when running RPPASPACE. The software will search for image files with the extension as specified in the imageextension parameter of the same object.  If no imageextension parameter is provided then the software will default to searching for files with the extension ".tif".  Supported file types and extensions include ".tif", ".png", ".bmp", ".gif", and ".jpg". All image files for a set of slides must be of the same image type with the specified file extension.  The portion of the file name without the file extension will be compared to the antibody names from the input quantification files.   Where there is not an exact match of the file name with the expected image extension, then a default image labeled "missing slide image" will be shown where the scaled slide image would normally appear in the combined output image file.   The combined output image file will be named with the antibody name of the input slide quantification file.
 If there are issues in generating graphics for a particular slide or all slides in general, then messages regarding the issues will be written to the designated warning or error output file, depending on the severity of the issue.  
   
 \newpage
@@ -588,7 +588,7 @@ All outputs of RPPASPACE will be created in the specified output directory.  If 
 ## For each successfully processed slide
 Two png plot files.  See section labelled "Generate Graphical Output" for details of these images.  
 
-If output jpg images were requested by setting the parameter createoutputjpg=TRUE in the RPPASPACESettings object, then one jpg file combining the two png files above and the original slide image file (or "missing slide" equivalent image provided by RPPASPACE package).
+If combined output images were requested by setting the parameter createcombinedoutputimage=TRUE in the RPPASPACESettings object, then one png file combining the two png files above and the original slide image file (or "missing slide" equivalent image provided by RPPASPACE package).
 
 ## One instance per slide set
 

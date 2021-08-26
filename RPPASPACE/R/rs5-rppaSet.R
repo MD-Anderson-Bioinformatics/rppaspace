@@ -244,7 +244,7 @@ createResidualsPNG <- function (
 		mar_right <- mar_right + as.integer(expandx / 2)
 	}
 
-	png(filename=outputfilename, bg="white", width = pngxsize, height = pngysize, type="cairo-png")
+	png(filename=outputfilename, bg="white", width = pngxsize, height = pngysize, units="px", type="cairo-png")
 	plot.new()
 
 	viewport(x=unit(mar_left, "native"), y=unit(mar_bottom, "native"))
@@ -449,6 +449,8 @@ createResidualsPNG <- function (
         antibody <- antibodies[i]
         rppafit <- rppaset@fits[[i]]
 
+		print(paste("Creating fit images for slide ", i, " (", antibody, ")"))
+		#print(paste("Creating fit image 1, top part, for slide ", i, " (", antibody, ")"))
         if (!is.RPPAFit(rppafit)) {
 			msg <- paste("Slide ", i, " (", antibody, ") will not have fit graphs due to missing or invalid RPPAFit object.", sep="")
             warning(msg)
@@ -484,6 +486,7 @@ createResidualsPNG <- function (
                  height=320)
 		dev.off()
 
+		#print(paste("Creating fit image 1, bottom part, for slide ", i, " (", antibody, ")"))
 		rppa <- rppafit@rppa
 		residualData <- residuals(rppafit, "r2")
 
@@ -542,15 +545,16 @@ createResidualsPNG <- function (
 				rotation = residualsrotation
 			)
 
-		#Remove the temporary file produced for the top plot.
-		file.remove(topPlotFileName)
         dev.off()
+		file.remove(topPlotFileName)
         dev.set(fitdev)
 
 		#-----------------------------------------------------------------
         ##
         ## Second pair of plots
         ##
+		#print(paste("Creating fit image 2 for slide ", i, " (", antibody, ")"))
+
         par(bg="white", mfrow=c(2, 1))
 
         ## Plot residuals graph
@@ -612,135 +616,150 @@ createResidualsPNG <- function (
 								 #dimensions of two graphs already written to disk
 								 graphDimensions = c(plot_1 = c(x=0, y=0), plot_2 = c(x=0, y=0))  
 								 ) {
-    ## Check arguments
+	fitdev <- dev.cur()
+	
+	## Check arguments
     stopifnot(is.character(antibody)  && length(antibody) == 1)
     stopifnot(is.character(prefix)    && length(prefix) == 1)
     stopifnot(is.character(outputdir) && length(outputdir) == 1)
     stopifnot(is.character(slideImageName) && length(slideImageName) == 1)
-
-	if (!(slideImageRotation %in% c(0, 90, 180, 270))) {
-		msg <- paste("Invalid slideImageRotation value =", 
-			slideImageRotation, 
-			". Acceptable values are 0, 90, 180, and 270. ",
-			"Rotation request ignored.  Default rotation of 0 used.",
-			sep="")
-		write(msg, warningsFileName, append=TRUE)
-		message(msg)
-		slideImageRotation = 0
-	}
-
-    ## Begin processing
-    filename <- sprintf("%s_%s_1.png", prefix, antibody)
-    pg1 <- file.path(outputdir, .portableFilename(filename))
-
-    filename <- sprintf("%s_%s_2.png", prefix, antibody)
-    pg2 <- file.path(outputdir, .portableFilename(filename))
-
-	filename <- sprintf(".%s.temp.jpg", antibody)
-	tempImageName <- file.path(outputdir, .portableFilename(filename))
 	
-    filename <- sprintf("%s.jpg", antibody)
-    outputImageName <- file.path(outputdir, .portableFilename(filename))
+	rc <- FALSE
+	
+	tryCatch({
+		if (!(slideImageRotation %in% c(0, 90, 180, 270))) {
+			msg <- paste("Invalid slideImageRotation value =", 
+				slideImageRotation, 
+				". Acceptable values are 0, 90, 180, and 270. ",
+				"Rotation request ignored.  Default rotation of 0 used.",
+				sep="")
+			write(msg, warningsFileName, append=TRUE)
+			message(msg)
+			slideImageRotation = 0
+		}
+
+		## Begin processing
+		filename <- sprintf("%s_%s_1.png", prefix, antibody)
+		pg1 <- file.path(outputdir, .portableFilename(filename))
+
+		filename <- sprintf("%s_%s_2.png", prefix, antibody)
+		pg2 <- file.path(outputdir, .portableFilename(filename))
+
+		filename <- sprintf(".%s.temp.png", antibody)
+		tempImageName <- file.path(outputdir, .portableFilename(filename))
+		
+		filename <- sprintf("%s.png", antibody)
+		outputImageName <- file.path(outputdir, .portableFilename(filename))
 
 
-	#The imager package fails to display the pngs if trying to append a 16 bit monochrome tif converted to color and color pngs
-	#If we save the slide image as a jpg and then reload it, the merge works fine.
-	#Converting before rotating or scaling takes much less time than saving and loading after add.color
-	lenSlideImageName = nchar(slideImageName)
+		#The imager package fails to display the pngs if trying to append a 16 bit monochrome tif converted to color and color pngs
+		#If we save the slide image as a png or jpg and then reload it, the merge works fine.
+		#Converting before rotating or scaling takes much less time than saving and loading after add.color
+		lenSlideImageName = nchar(slideImageName)
 
-	if (missingSlide == FALSE && (substr(slideImageName, lenSlideImageName - 3, lenSlideImageName) %in% c(".tif", "tiff"))) {
-		img <- readTIFF(slideImageName, native=TRUE)
-		writeJPEG(img, target=tempImageName, quality=1)
-		slideImage <- load.image(tempImageName)
-		file.remove(tempImageName)
-	} else {
-		#Load the slide Image file
-		slideImage <- load.image(slideImageName)
-	}
+		if (missingSlide == FALSE && (substr(slideImageName, lenSlideImageName - 3, lenSlideImageName) %in% c(".tif", "tiff"))) {
+			img <- readTIFF(slideImageName, native=TRUE, convert=TRUE)
+			#writeJPEG(img, target=tempImageName, quality=1)
+			writePNG(img, target=tempImageName)
+			slideImage <- load.image(tempImageName)
+			file.remove(tempImageName)
+		} else {
+			#Load the slide Image file
+			slideImage <- load.image(slideImageName)
+		}
 
-	#Get image heights and widths
-	slideWidth <- dim(slideImage)[1]
-	slideHeight <- dim(slideImage)[2]
-
-	minDim <- min(slideWidth, slideHeight)
-	if (minDim > 640)
-	{
-		slideImage <- imresize(slideImage, scale = 640 / minDim, interpolation = 6)
-		#Get new image heights and widths
+		#Get image heights and widths
 		slideWidth <- dim(slideImage)[1]
 		slideHeight <- dim(slideImage)[2]
-	}
 
-	#Rotate slide image if requested
-	if (slideImageRotation != 0) {
-		slideImage <- imrotate(slideImage, slideImageRotation)
-	}
+		minDim <- min(slideWidth, slideHeight)
+		if (minDim > 640)
+		{
+			slideImage <- imresize(slideImage, scale = 640 / minDim, interpolation = 6)
+			#Get new image heights and widths
+			slideWidth <- dim(slideImage)[1]
+			slideHeight <- dim(slideImage)[2]
+		}
 
-	if (dim(slideImage)[4] == 1) {  #Monochrome Image
-		#Color depth will be lost if was initially 16 bit grayscale, being switched to 8 bit rgb.
-		slideImage <- add.color(slideImage)
-	}
+		#Rotate slide image if requested
+		if (slideImageRotation != 0) {
+			slideImage <- imrotate(slideImage, slideImageRotation)
+		}
 
-	#Get image heights and widths
-	slideWidth <- dim(slideImage)[1]
-	slideHeight <- dim(slideImage)[2]
+		if (dim(slideImage)[4] == 1) {  #Monochrome Image
+			#Color depth will be lost if was initially 16 bit grayscale, being switched to 8 bit rgb.
+			slideImage <- add.color(slideImage)
+		}
 
-	save.image(slideImage, tempImageName)
-	rm(slideImage)
+		#Get image heights and widths
+		slideWidth <- dim(slideImage)[1]
+		slideHeight <- dim(slideImage)[2]
 
-	png1x <- graphDimensions["plot_1.x"]
-	png1y <- graphDimensions["plot_1.y"]
-	png2x <- graphDimensions["plot_2.x"]
-	png2y <- graphDimensions["plot_2.y"]
+		save.image(slideImage, tempImageName)
+		rm(slideImage)
 
-	#Determine which slide image dimension is greater, width or height. 
-	
-	if (slideHeight > slideWidth)
-	{
-		orientation <- 1 # alternate layout: graphs left, slide right
-		combinedGraphsWidth <- max(png1x, png2x)
-		combinedGraphsHeight <- png1y + png2y
-		jpgWidth <- combinedGraphsWidth + slideWidth
-		jpgHeight <- max(combinedGraphsHeight, slideHeight)
-	}
-	else
-	{
-		orientation <- 0 # default layout: graphs top, slide bottom
-		combinedGraphsWidth <- png1x + png2x
-		combinedGraphsHeight <- max(png1y, png2y)
-		jpgWidth <- max(combinedGraphsWidth, slideWidth)
-		jpgHeight <- combinedGraphsHeight + slideHeight
-	}
-	jpeg(filename=outputImageName, bg="white", width = jpgWidth, height = jpgHeight, type="cairo")
-	plot.new()
-	
-	if (orientation == 1)
-	{
-		grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
-			width = unit(png1x, "native"), height = unit(-png1y, "native"))
-			
-		grid.raster(readPNG(pg2), x = unit(0, "native"), y = unit(png1y, "native"), just=c("left","top"), interpolate = FALSE, 
-			width = unit(png2x, "native"), height = unit(-png2y, "native"))
-			
-		grid.raster(readJPEG(tempImageName), x = unit(combinedGraphsWidth, "native"),  y = unit(0, "native"), interpolate = FALSE, 
-			just=c("left","top"), width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
-	}
-	else
-	{
-		grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE, 
-			width = unit(png1x, "native"), height = unit(-png1y, "native"))
-			
-		grid.raster(readPNG(pg2), x = unit(png1x, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
-			width = unit(png2x, "native"), height = unit(-png2y, "native"))
+		png1x <- graphDimensions["plot_1.x"]
+		png1y <- graphDimensions["plot_1.y"]
+		png2x <- graphDimensions["plot_2.x"]
+		png2y <- graphDimensions["plot_2.y"]
+
+		#Determine which slide image dimension is greater, width or height. 
 		
-		grid.raster(readJPEG(tempImageName), x = unit(0, "native"), y = unit(combinedGraphsHeight, "native"), just=c("left","top"), 
-			interpolate=FALSE, width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
-	}
-	dev.off()
-	
-	file.remove(tempImageName)
+		if (slideHeight > slideWidth)
+		{
+			orientation <- 1 # alternate layout: graphs left, slide right
+			combinedGraphsWidth <- max(png1x, png2x)
+			combinedGraphsHeight <- png1y + png2y
+			combinedWidth <- combinedGraphsWidth + slideWidth
+			combinedHeight <- max(combinedGraphsHeight, slideHeight)
+		}
+		else
+		{
+			orientation <- 0 # default layout: graphs top, slide bottom
+			combinedGraphsWidth <- png1x + png2x
+			combinedGraphsHeight <- max(png1y, png2y)
+			combinedWidth <- max(combinedGraphsWidth, slideWidth)
+			combinedHeight <- combinedGraphsHeight + slideHeight
+		}
+		print(paste("Creating combined output graphic", filename))
+		png(filename=outputImageName, bg="white", width = combinedWidth, height = combinedHeight, units="px", type="cairo-png")
+		plot.new()
+		
+		if (orientation == 1)
+		{
+			grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
+				width = unit(png1x, "native"), height = unit(-png1y, "native"))
+				
+			grid.raster(readPNG(pg2), x = unit(0, "native"), y = unit(png1y, "native"), just=c("left","top"), interpolate = FALSE, 
+				width = unit(png2x, "native"), height = unit(-png2y, "native"))
+				
+			grid.raster(readPNG(tempImageName), x = unit(combinedGraphsWidth, "native"),  y = unit(0, "native"), interpolate = FALSE, 
+				just=c("left","top"), width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
+		}
+		else
+		{
+			grid.raster(readPNG(pg1), x = unit(0, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE, 
+				width = unit(png1x, "native"), height = unit(-png1y, "native"))
+				
+			grid.raster(readPNG(pg2), x = unit(png1x, "native"), y = unit(0, "native"), just=c("left","top"), interpolate = FALSE,  
+				width = unit(png2x, "native"), height = unit(-png2y, "native"))
+			
+			grid.raster(readPNG(tempImageName), x = unit(0, "native"), y = unit(combinedGraphsHeight, "native"), just=c("left","top"), 
+				interpolate=FALSE, width = unit(slideWidth, "native"), height = unit(-slideHeight, "native"))
+		}
+		dev.off()
+		
+		file.remove(tempImageName)
 
-	rc <- TRUE
+		rc <- TRUE
+	},	
+	error=function(cond) {
+		print("Error merging graphs and slide image")
+		message("###stacktrace###")
+		dump.frames()
+		message("<<<ERROR>>>", cond)
+	})
+	dev.set(fitdev)
 
     return(rc)
 }
@@ -842,7 +861,7 @@ setMethod("write.summary", signature(object="RPPASet"),
                    path,
                    prefix="rppaspace",
                    graphs=TRUE,
-				   createoutputjpg=FALSE,
+				   createcombinedoutputimage=FALSE,
                    imagedir=NULL,
                    onlynormqcgood=ran.prefitqc(object),
 				   imageextension=".tif",
@@ -909,18 +928,27 @@ setMethod("write.summary", signature(object="RPPASet"),
 	graphDimensions <- c(plot_1 = c(x=0, y=0), plot_2 = c(x=0, y=0))
     ## Graph fits, if requested
     if (graphs) {
-		#t <- proc.time()
-        #print("Saving fit graphs")
-        tm <- proc.time()
+		tryCatch({
+			#t <- proc.time()
+			#print("Saving fit graphs")
+			tm <- proc.time()
 
-        ## Save fit graphs
-        dev.new(title="Fit Graphs")
-        graphDimensions <- .createFitGraphs(object, path, prefix, residualsrotation, majorXDivisions, majorYDivisions)
-		#t <- proc.time() - tm
-		#print(paste("Fit graph output time:",t[3]))
+			## Save fit graphs
+			dev.new(title="Fit Graphs")
+			graphDimensions <- .createFitGraphs(object, path, prefix, residualsrotation, majorXDivisions, majorYDivisions)
+			#t <- proc.time() - tm
+			#print(paste("Fit graph output time:",t[3]))
+		},
+		error=function(cond) {
+			print("Error creating Fit Graphs")
+			message("###stacktrace###")
+			dump.frames()
+			message("<<<ERROR>>>", cond)
+		})
+		
 	}
 
-	if (createoutputjpg){
+	if (createcombinedoutputimage){
 	    #t <- proc.time()
 
 		pkgimgdir <- system.file("images", package="RPPASPACE")
@@ -981,7 +1009,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 			#cat(c("Testing ", antibody, "\n" ))
 
 			if (!is.null(rppafit) && is.RPPAFit(rppafit)) {
-				print(paste("Merging graphs and image for", antibody))
+				#print(paste("Merging graphs and image for", antibody))
 				flush.console()
 
 				## If no corresponding image exists, substitute "missing" image
@@ -1011,7 +1039,7 @@ setMethod("write.summary", signature(object="RPPASet"),
 			}
 		}
 	    #t <- proc.time() - tm
-		#print(paste("Output jpg creation time:",t[3]))
+		#print(paste("Combined output image file creation time:",t[3]))
 
     }
 

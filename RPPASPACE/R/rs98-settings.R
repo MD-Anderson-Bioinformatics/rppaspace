@@ -19,7 +19,7 @@ setClass("RPPASPACESettings",
 		onlynormqcgood="logical",
 		seriesToIgnore="OptionalList",
 		parallelClusterSize="integer", 
-		createoutputjpg="logical",
+		createcombinedoutputimage="logical",
 		imageextension="character", 
 		imagerotation="integer",
 		residualsrotation="integer",
@@ -28,7 +28,7 @@ setClass("RPPASPACESettings",
 	),
 	prototype(
 		parallelClusterSize=as.integer(1), 
-		createoutputjpg=as.logical(FALSE),
+		createcombinedoutputimage=as.logical(FALSE),
 		imageextension=".tif", 
 		imagerotation=as.integer(0),
 		residualsrotation=as.integer(0),
@@ -147,7 +147,7 @@ RPPASPACESettings <- function(txtdir,
 							doprefitqc=FALSE,
 							onlynormqcgood=doprefitqc,
 							parallelClusterSize=as.integer(1), 
-							createoutputjpg=FALSE,
+							createcombinedoutputimage=FALSE,
 							imageextension=".tif", 
 							imagerotation=as.integer(0),
 							residualsrotation=as.integer(0),
@@ -211,12 +211,12 @@ RPPASPACESettings <- function(txtdir,
                      sQuote("onlynormqcgood")))
     }
 
-    if (!is.logical(createoutputjpg)) {
+    if (!is.logical(createcombinedoutputimage)) {
         stop(sprintf("argument %s must be logical",
-                     sQuote("createoutputjpg")))
-    } else if (!(length(createoutputjpg) == 1)) {
+                     sQuote("createcombinedoutputimage")))
+    } else if (!(length(createcombinedoutputimage) == 1)) {
         stop(sprintf("argument %s must be of length 1",
-                     sQuote("createoutputjpg")))
+                     sQuote("createcombinedoutputimage")))
     }
 
     ## Create new class
@@ -231,7 +231,7 @@ RPPASPACESettings <- function(txtdir,
         normparams=normparams,
         onlynormqcgood=onlynormqcgood,
         parallelClusterSize=parallelClusterSize, 
-		createoutputjpg=createoutputjpg,
+		createcombinedoutputimage=createcombinedoutputimage,
 		imageextension=imageextension, 
 		imagerotation=imagerotation,
 		residualsrotation=residualsrotation,
@@ -372,7 +372,7 @@ setMethod("paramString", signature(object="RPPASPACESettings"),
           sprintf("normparams:\n%s\n", indent(normparams)),
           sprintf("onlynormqcgood: %s\n", object@onlynormqcgood),
 		  sprintf("parallelClusterSize: %s\n", shQuote(object@parallelClusterSize)),
-		  sprintf("createoutputjpg: %s\n", object@createoutputjpg),
+		  sprintf("createcombinedoutputimage: %s\n", object@createcombinedoutputimage),
 		  sprintf("imageextension: %s\n", shQuote(object@imageextension)),
 		  sprintf("imagerotation: %s\n", shQuote(object@imagerotation)),
 		  sprintf("residualsrotation: %s\n", shQuote(object@residualsrotation)),

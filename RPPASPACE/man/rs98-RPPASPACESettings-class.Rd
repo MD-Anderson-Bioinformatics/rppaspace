@@ -24,7 +24,7 @@ RPPASPACESettings(txtdir,
 				    doprefitqc=FALSE,
 				    onlynormqcgood=doprefitqc,
 				    parallelClusterSize=as.integer(1),
-					createoutputjpg = FALSE,
+					createcombinedoutputimage = FALSE,
 				    imageextension=".tif", 
 				    imagerotation=as.integer(0),
 				    residualsrotation=as.integer(0),
@@ -64,15 +64,15 @@ is.RPPASPACESettings(x)
 	the calculated curve sections of the code will be done in parallel 
 	when this number is greater than 1.
 	Defaults to 1 for backwards compatibility if not specified.}
-  \item{createoutputjpg}{logical scalar. If \code{TRUE}, an output jpg file will 
-	be created for each valid slide in the set. The jpg file  that is a composite 
+  \item{createcombinedoutputimage}{logical scalar. If \code{TRUE}, an output png file will 
+	be created for each valid slide in the set. The png file  that is a composite 
 	of the two generated png files and the original slide image.}
   \item{imageextension}{character string specifying extension to use when searching
 	for images matching the slide file names. Acceptable values are 
 	(".tif", ".png", ".bmp", ".gif", ".jpg")}
   \item{imagerotation}{numeric scalar containing 90 degree value to rotate the 
-	input image by when appending it below the generated graphs in the output 
-	jpg file for each slide. Defaults to 0 if not specified.  
+	input image by when appending it below the generated graphs in the combined output 
+	image file for each slide. Defaults to 0 if not specified.  
 	Acceptable values (0, 90, 180, 270)}
   \item{residualsrotation}{numeric scalar containing 90 degree value to rotate 
 	the generated residuals image by when generating the output graphic.  
@@ -121,7 +121,7 @@ is.RPPASPACESettings(x)
     \item{\code{normparams}:}{object of class \code{RPPANormalizationParams}
       specifying the parameters that control normalization}
     \item{\code{doprefitqc}:}{see argument}
-    \item{\code{createoutputjpg}:}{see argument}
+    \item{\code{createcombinedoutputimage}:}{see argument}
 	\item{\code{imageextension}:}{see argument}
     \item{\code{imagerotation}:}{see argument}
     \item{\code{residualsrotation}:}{see argument}    
@@ -216,7 +216,7 @@ settings <- RPPASPACESettings(txtdir=txtdir,
 				normparams=normparams,
 				onlynormqcgood=FALSE,
 				imageextension=".jpg",
-				createoutputjpg=TRUE,
+				createcombinedoutputimage=TRUE,
 				warningsFileName=warningsFileName,
 				parallelClusterSize=as.integer(number_cpus_to_use))
 							   
