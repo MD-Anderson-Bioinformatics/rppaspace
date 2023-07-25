@@ -129,9 +129,9 @@ DS5RPPAPreFitQC <- function(rppa,
         mean.net <- df[[measure.net]]
         model <- lm(log(mean.net) ~ steps)
         slope <- coef(model)["steps"]
+
         ## See how far the observed slopes are from that of perfect dilution.
         perfect.slope <- 0.6931
-		
         abs(slope - perfect.slope)
     }
 
@@ -146,16 +146,17 @@ DS5RPPAPreFitQC <- function(rppa,
 
 	#Incorporates filtering series to be ignored by only using sample points that are also to be made part of the curve
     samples.df <- rppa@data[rownames(tracking[tracking$isSample & tracking$makePartOfCurve,]),]
-	
 	posCtrlRows <- rownames(tracking[tracking$isPosCtrl | tracking$isNoise,])
+
     positives_or_noise.df <- rppa@data[posCtrlRows,]
     rownames(samples.df) <- 1:nrow(samples.df)
+
 
     dilutions <- sort(unique(positives_or_noise.df$Dilution), decreasing=TRUE)
     ndilutions <- length(dilutions)  # number of dilution series per slide
 
     stopifnot(ndilutions == numDilutionsInSeries)
-	
+
 	strengths <- sort(unique(rppa@data$Steps), decreasing=TRUE)
 
     ## Set measure names to use
@@ -172,6 +173,7 @@ DS5RPPAPreFitQC <- function(rppa,
             unique(layout.df[pc.tf, "Sub.Row"])
         },
         layout.df=rppa@data)
+
     names(plocats) <- dilutions
 
     positive.locats <- lapply(plocats,
@@ -185,10 +187,27 @@ DS5RPPAPreFitQC <- function(rppa,
     slopes <- NULL
     cvs <- NULL
 
-    for (positives in positive.locats) {
+	indexCorrection = c(0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1,0)
+	corrlen <- length(indexCorrection)
+    for (positives in positive.locats)
+	{
         ## Calculate slope for measure (good if near zero)
         y <- positives
         x <- seq_along(y)    # seq_len(nrows(positives_or_noise.df)/ndilutions) = 1:96
+
+		# Values are in the system in a different order in RPPASPACE than they were in SuperCurve.
+		# The following loops update the order of the x coordinates so that they'll match
+		# the order of the values so that the slope calculations will come up with the same values
+		# in RPPASPACE as they did in SuperCurve.
+		for (i in 0:3)
+		{
+			for(j in 1:corrlen)
+			{
+				x[i*corrlen + j] <- x[i*corrlen + j] - indexCorrection[j]
+				
+			}
+		}
+
         model <- lm(y~x)
         slope <- abs(coef(model)["x"])
         slopes <- c(slopes, slope)
@@ -221,7 +240,7 @@ DS5RPPAPreFitQC <- function(rppa,
     ## Calculate percent good
     percentgood <- percentGood(samples.df)
 
-	printQCParts <- TRUE
+	printQCParts <- FALSE
 	if (printQCParts) {
 		z = (
 			3.013 
@@ -236,11 +255,11 @@ DS5RPPAPreFitQC <- function(rppa,
 
 		qc_score = exp(z) / (1 + exp(z))
 
-#		print(paste(3.013, -(0.9585 * slopediff), -(21.51  * cvs[1]), 
-#			-(43.06 * cvs[2]), -(19.29 * cvs[4]), -(0.01574 * slopes[5]), 
-#			(0.00003885 * drdiffs[2]), -(0.00004131 * drdiffs[4]), 
-#			(0.01271 * percentgood), "=", z , "==>", qc_score
-#			))
+		print(paste(3.013, -(0.9585 * slopediff), -(21.51  * cvs[1]), 
+			-(43.06 * cvs[2]), -(19.29 * cvs[4]), -(0.01574 * slopes[5]), 
+			(0.00003885 * drdiffs[2]), -(0.00004131 * drdiffs[4]), 
+			(0.01271 * percentgood), "=", z , "==>", qc_score
+			))
 	}
 	
     ## Create new class

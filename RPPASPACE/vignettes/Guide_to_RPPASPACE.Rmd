@@ -3,7 +3,7 @@ title: "Guide_to_RPPASPACE"
 subtitle: "Reverse-Phase Protein Array (RPPA)\n Super Position and Concentration Evaluation (SPACE)"
 author: 
   - James M. Melott and Keith Baggerly
-date: "11/02/2020"
+date: "10/18/2021"
 graphics: yes
 vignette: >
   %\VignetteEngine{knitr::rmarkdown_notangle}
