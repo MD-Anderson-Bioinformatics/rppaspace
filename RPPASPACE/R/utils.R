@@ -120,7 +120,7 @@ spottype.lower <- tolower(spottype.all)
 
 ##-----------------------------------------------------------------------------
 .isProbability <- function(x) {
-    isTRUE(is.numeric(x) && (x >= 0 && x <= 1))
+    isTRUE(is.numeric(x) && (all(x >= 0) && all(x <= 1)))
 }
 
 

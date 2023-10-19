@@ -531,7 +531,7 @@ createResidualsPNG <- function (
 		residualsPlotDimensions <- 
 			createResidualsPNG(
 				file.path(path, .portableFilename(topPlotFileName)),
-				outputfilename,
+				.portableFilename(outputfilename),
 				measure,
 				antibody,
 				m,
@@ -546,7 +546,7 @@ createResidualsPNG <- function (
 			)
 
         dev.off()
-		file.remove(topPlotFileName)
+		file.remove(.portableFilename(topPlotFileName))
         dev.set(fitdev)
 
 		#-----------------------------------------------------------------
@@ -1217,11 +1217,6 @@ RPPASet <- function(path,
         print(paste("Reading", slideFilename))
         flush.console()
 
-		if (printTimings) { 
-			t <- proc.time() - ptm
-			print(paste("Adding slide :", slideFilename, ":" ,t[3]))
-		
-		}
         rppa <- tryCatch({
             RPPA(slideFilename,
                  path=path,
@@ -1324,17 +1319,12 @@ RPPASet <- function(path,
     if (doQC) {
         for (i in seq_along(slideFilenames)) {
             antibody <- antibodies[i]
-			
-			if (printTimings) { 
-				t <- proc.time() - ptm
-				print(paste("Slide:", antibody, ":",t[3]))
-			}
-			
+
             rppa <- rppas[[i]]
             if (!is.null(rppa)) {
 				print(paste("Quality checking slide ", i, " : ", antibody, ".", sep=""))
 				flush.console()
-				
+
                 prefitqc <- tryCatch({
 					#RPPAPreFitQC(rppa, designparams@dilutionsInSeries)
 					RPPAPreFitQC(rppa)

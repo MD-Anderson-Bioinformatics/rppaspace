@@ -58,10 +58,6 @@ registerPkgFitModels <- function() {
 ## verbose - if true, have the function tell you what it is doing
 ## veryVerbose - if true, have the function overwhelm you telling you what it
 ##           is doing
-## warnLevel - used to set the 'warn' option before calling 'rlm'.
-##           since this is wrapped in a 'try', it won't cause failure but will
-##           give us a chance to figure out which dilution series failed.
-##           Setting warnLevel to two or greater may change computed results.
 
 
 ##-----------------------------------------------------------------------------
@@ -78,7 +74,7 @@ RPPAFit <- function(rppa,
                     trace=FALSE,
                     verbose=FALSE,
                     veryVerbose=FALSE,
-					warnLevel=0,
+                    warnLevel=0,
                     residualsrotation=as.integer(0)) {
     ## Check arguments
     ## [1] 'rppa' is checked in the call to RPPAFitFromParams
@@ -93,7 +89,7 @@ RPPAFit <- function(rppa,
                             trace,
                             verbose,
                             veryVerbose,
-							warnLevel,
+                            warnLevel,
                             residualsrotation)
     RPPAFitFromParams(rppa, params)
 }
@@ -112,7 +108,7 @@ RPPAFitParams <- function(measure,
                           verbose=FALSE,
                           veryVerbose=FALSE,
                           warnLevel=0,
-						  residualsrotation=as.integer(0)) {
+                          residualsrotation=as.integer(0)) {
     ## Check arguments
   
     ## Start with the critical parameter, 'model', since it tells us which
@@ -267,12 +263,12 @@ setMethod("paramString", signature(object="RPPAFitParams"),
     lBot <- min(temp, na.rm=TRUE)
     lTop <- max(temp, na.rm=TRUE)
 
-	#Only non-ignored sample points are used to calculate the alpha, beta, and gamma,
-	#but the Logitz curve for starting values are calculated for all samples
+    #Only non-ignored sample points are used to calculate the alpha, beta, and gamma,
+    #but the Logitz curve for starting values are calculated for all samples
     lindata <- .calcLogitz(yval, lBot, lTop-lBot, 1)
-	
+
     sampleseries <- seriesNames(rppa) # limits to series sample points only
-	nonignoredSeries <- seriesToUseToMakeCurve(rppa)
+    nonignoredSeries <- seriesToUseToMakeCurve(rppa)
 
     ##-------------------------------------------------------------------------
     .estimateLogisticSlope <- function(ser,
@@ -293,8 +289,8 @@ setMethod("paramString", signature(object="RPPAFitParams"),
             NA
         } else {
             ## ychange / xchange
-			#TODO: Possible issue here if max or min are not 
-			#the max step point and min step points respectively. (JMM)
+            #TODO: Possible issue here if max or min are not 
+            #the max step point and min step points respectively. (JMM)
             (max(y) - min(y)) / (max(steps) - min(steps))
         }
     }
@@ -303,10 +299,10 @@ setMethod("paramString", signature(object="RPPAFitParams"),
     ## There should be a more comprehensible way to write this:
     dat <- unlist(lapply(nonignoredSeries,
                          .estimateLogisticSlope,
-						 rppa@data$Steps,
+                         rppa@data$Steps,
                          rppa@data$Series.Id,
                          lindata))
-	
+
     ## Force a nonzero slope for starting estimate
     minslope <- 0.001
 
@@ -315,7 +311,7 @@ setMethod("paramString", signature(object="RPPAFitParams"),
 
     ## Use mean, not median. We may have many blank samples on a slide,
     ## in which case median slope will be 0
-	## Gamma calculated only using nonignored series
+    ## Gamma calculated only using nonignored series
     gamma <- mean(dat, trim=0.01)
     gamma <- max(gamma, minslope) # force nonzero slope for starting estimate
 
@@ -326,7 +322,7 @@ setMethod("paramString", signature(object="RPPAFitParams"),
     seriesdata <- lindata[rppa@tracking$fitToCurve]
 
     seriessteps <- layout$Steps[rppa@tracking$fitToCurve]
-	
+
     for (this in sampleseries) {
         items <- rppa@data$Series.Id[rppa@tracking$fitToCurve] == this
         passer[names(passer) == this] <- median(seriesdata[items] / gamma - seriessteps[items],
@@ -428,8 +424,8 @@ RPPAFitFromParams <- function(rppa,
     ## "no visible binding" as code below uses assign() rather than "<-".
     measure <- model <- xform <- method <- trim <- warnLevel <-
     ignoreNegative <- trace <- verbose <- veryVerbose <- ci <- NULL
-	
-	dilutionsInSeries <- length(unique(rppa@data$Dilution[rppa@data$Dilution > 0]))
+
+    dilutionsInSeries <- length(unique(rppa@data$Dilution[rppa@data$Dilution > 0]))
 
     ## Create variables from 'fitparams' slots
     for (slotname in slotNames(fitparams)) {
@@ -438,10 +434,10 @@ RPPAFitFromParams <- function(rppa,
 
     ## Need to make certain that the 'model' is a registered FitClass
     modelClass <- tryCatch(getRegisteredModel(model),
-		error=function(e) {
-			stop(sprintf("argument %s must be name of registered fit class",
-				sQuote("model")))
-		})
+        error=function(e) {
+            stop(sprintf("argument %s must be name of registered fit class",
+            sQuote("model")))
+        })
 
     ## Need to make sure that 'measure' refers to an actual data column
     if (missing("measure")) {
@@ -466,7 +462,7 @@ RPPAFitFromParams <- function(rppa,
                      rppa@data[, measure]
                  }
 
-	silent <- warnLevel < 0
+    silent <- warnLevel < 0
 
     ## Perform the first pass to initialize the estimates
     progmethod("firstpass")
@@ -487,7 +483,7 @@ RPPAFitFromParams <- function(rppa,
 
     ## Put our current guess at the x and y values into vectors
     curveyval <- intensity[rppa@tracking$makePartOfCurve]
-	fityval <- intensity[rppa@tracking$fitToCurve]
+    fityval <- intensity[rppa@tracking$fitToCurve]
     ## Create new class
     fc <- new(modelClass)
 
@@ -499,7 +495,7 @@ RPPAFitFromParams <- function(rppa,
     series <- seriesNames(rppa)
     curvesamplenames <- rppa@data$Series.Id[rppa@tracking$makePartOfCurve]
     fitsamplenames <- rppa@data$Series.Id[rppa@tracking$fitToCurve]
-	noise.calc <- as.numeric(NA)
+    noise.calc <- as.numeric(NA)
 
     for (pass in seq_len(2)) {
 
@@ -542,7 +538,7 @@ RPPAFitFromParams <- function(rppa,
 
         progmethod(sprintf("%s fit series", pass.name))
 
-		#All sample series, not just unignored ones
+        #All sample series, not just unignored ones
         for (this in series) {
             items <- fitsamplenames == this
 
@@ -557,8 +553,8 @@ RPPAFitFromParams <- function(rppa,
                                        percent.this))
                 }
             }
-			
-			#Fit one sample series of points to the curve generated from nonignored series
+
+            #Fit one sample series of points to the curve generated from nonignored series
             fs <- fitSeries(fc,
                             diln=fitsteps[items],
                             intensity=fityval[items],
@@ -591,14 +587,14 @@ RPPAFitFromParams <- function(rppa,
             print(summary(ss.ratio))
             flush.console()
         }
-		
-		##--------------------- NOISE --------------------------
-		## If there are any noise points defined,
-		## then fit those points to the curves calculated above
 
-		if (any(rppa@tracking$isNoise == TRUE)) {
-			noise.calc <- .calculateNoise(intensity, rppa, dilutionsInSeries, fc, ignoreNegative, method, silent, trace, verbose)
-		}
+        ##--------------------- NOISE --------------------------
+        ## If there are any noise points defined,
+        ## then fit those points to the curves calculated above
+
+        if (any(rppa@tracking$isNoise == TRUE)) {
+            noise.calc <- .calculateNoise(intensity, rppa, dilutionsInSeries, fc, ignoreNegative, method, silent, trace, verbose)
+        }
     }
 
     ## Create new class
@@ -618,11 +614,11 @@ RPPAFitFromParams <- function(rppa,
                   intensities=signif(fitted(fc, pass2), 7),
                   ss.ratio=ss.ratio,
                   conf.width=0,
-				  noise=noise.calc,
+                  noise=noise.calc,
                   warn=warn2,
-				  residualsrotation=fitparams@residualsrotation,
+                  residualsrotation=fitparams@residualsrotation,
                   version=packageDescription("RPPASPACE", fields="Version"))
-	  if (trim > 0) {
+      if (trim > 0) {
         if (verbose) {
             cat("Trimming concentrations...", "\n")
             flush.console()
@@ -633,10 +629,10 @@ RPPAFitFromParams <- function(rppa,
             trimConc(fc,
                 conc=signif(fitted(result, "X"),7),
                 intensity=intensity,
-				steps=rppa@data$Steps[rppa@data$Spot.Type %in% spottype.sample],
+                steps=rppa@data$Steps[rppa@data$Spot.Type %in% spottype.sample],
                 trimLevel=trim,
-				antibody=rppa@antibody
-				)
+                antibody=rppa@antibody
+                )
             },
                 error=function(e) {
                     message(conditionMessage(e))
@@ -682,43 +678,43 @@ RPPAFitFromParams <- function(rppa,
 ## Calculate noise on slide using positive control points
 ## specified as noise or posctrl-noise points in the slide file.
 .calculateNoise <- function(intensity, rppa, dilutionsInSeries, fc, 
-		ignoreNegative, method, silent, trace, verbose) {
+    ignoreNegative, method, silent, trace, verbose) {
 
-	isNoise = rppa@tracking$isNoise
-	noise.allSeries <- as.character(rppa@data$Series.Id[isNoise])
-	noise.series <- unique(as.character(rppa@data$Series.Id[isNoise]))
-	noise.samplenames <- as.character(rppa@data$Series.Id[isNoise])
-	noise.steps <- rppa@data$Steps[isNoise]
+    isNoise = rppa@tracking$isNoise
+    noise.allSeries <- as.character(rppa@data$Series.Id[isNoise])
+    noise.series <- unique(as.character(rppa@data$Series.Id[isNoise]))
+    noise.samplenames <- as.character(rppa@data$Series.Id[isNoise])
+    noise.steps <- rppa@data$Steps[isNoise]
 
-	nval <- intensity[isNoise]
-	
-	if (ignoreNegative) {
-		nval[nval < 0] <- NA
-	}
+    nval <- intensity[isNoise]
 
-	## Compute a robust estimate for alpha and beta
-	noise.lBot <- min(nval, na.rm=TRUE)
-	noise.lTop <- max(nval, na.rm=TRUE)
+    if (ignoreNegative) {
+        nval[nval < 0] <- NA
+    }
 
-	noise.lindata <- .calcLogitz(nval, noise.lBot, noise.lTop-noise.lBot, 1)
+    ## Compute a robust estimate for alpha and beta
+    noise.lBot <- min(nval, na.rm=TRUE)
+    noise.lTop <- max(nval, na.rm=TRUE)
 
-	logisticSlope <- rep(NA, length(noise.series))
-	names(logisticSlope) <- noise.series
-	
-	#Estimate logistic slope for noise series
-	for (noise.ser in noise.allSeries) {
-		noise.items <- noise.allSeries == noise.ser
-		noise.tempSteps <- noise.steps[noise.items]
-		noise.x <- noise.lindata[noise.items]
-		noise.y <- noise.x[!is.na(noise.x) & !is.infinite(noise.x)]
-	
-		if (!all(is.na(noise.y))) {
+    noise.lindata <- .calcLogitz(nval, noise.lBot, noise.lTop-noise.lBot, 1)
+
+    logisticSlope <- rep(NA, length(noise.series))
+    names(logisticSlope) <- noise.series
+
+    #Estimate logistic slope for noise series
+    for (noise.ser in noise.allSeries) {
+        noise.items <- noise.allSeries == noise.ser
+        noise.tempSteps <- noise.steps[noise.items]
+        noise.x <- noise.lindata[noise.items]
+        noise.y <- noise.x[!is.na(noise.x) & !is.infinite(noise.x)]
+    
+        if (!all(is.na(noise.y))) {
             ## ychange / xchange
             logisticSlope[noise.ser] <- (max(noise.y) - min(noise.y)) / (max(noise.tempSteps) - min(noise.tempSteps))
         }
-	}
+    }
 
-	## Force a nonzero slope for starting estimate
+    ## Force a nonzero slope for starting estimate
     minslope <- 0.001
 
     ## Filter out zero slopes from blank sample
@@ -726,7 +722,7 @@ RPPAFitFromParams <- function(rppa,
 
     ## Use mean, not median. We may have many blank samples on a slide,
     ## in which case median slope will be 0.  
-	## This shouldn't apply to control points, but better to be consistent with the rest of the slide.
+    ## This shouldn't apply to control points, but better to be consistent with the rest of the slide.
     ngamma <- mean(logisticSlope, trim=0.01)
     ngamma <- max(ngamma, minslope) # force nonzero slope for starting estimate
 
@@ -735,42 +731,42 @@ RPPAFitFromParams <- function(rppa,
     names(noise.passer) <- noise.series
 
     for (noise.ser in noise.allSeries) {
-		noise.items <- noise.allSeries == noise.ser
+        noise.items <- noise.allSeries == noise.ser
         noise.passer[noise.ser] <- median(noise.lindata[noise.items] / ngamma - noise.steps[noise.items],
                                na.rm=TRUE)
     }
 
-	noise.pass2 <- rep(NA, length(noise.series))
-	names(noise.pass2) <- noise.series
+    noise.pass2 <- rep(NA, length(noise.series))
+    names(noise.pass2) <- noise.series
 
-	noise.allResid <- matrix(NA, nrow=length(noise.series), ncol=dilutionsInSeries)
-	rownames(noise.allResid) <- noise.series
-	
-	noise.warn2 <- rep("", length(noise.series))
+    noise.allResid <- matrix(NA, nrow=length(noise.series), ncol=dilutionsInSeries)
+    rownames(noise.allResid) <- noise.series
+    
+    noise.warn2 <- rep("", length(noise.series))
 
-	## Calculate fit for Noise points
-	for (noise.ser in noise.series) {
-		noise.items <- noise.samplenames == noise.ser
+    ## Calculate fit for Noise points
+    for (noise.ser in noise.series) {
+        noise.items <- noise.samplenames == noise.ser
 
-		noise.fs <- fitSeries(fc,
-						diln=noise.steps[noise.items],
-						intensity=nval[noise.items],
-						est.conc=noise.passer[noise.ser],
-						method=method,
-						silent=silent,
-						trace=trace)
-		noise.pass2[noise.ser] <- noise.fs$est.conc
-		noise.warn2[noise.ser] <- noise.fs$warn
-	}
-	
-	if (verbose) {
-		cat("Finished estimating noise EC50 values. Coefficients:", "\n")
-		print(summary(noise.pass2))
-		cat("warnings:", "\n")
-		print(paste(noise.warn2, collapse="; "))
-		flush.console()
-	}
-	return(noise.pass2)
+        noise.fs <- fitSeries(fc,
+                        diln=noise.steps[noise.items],
+                        intensity=nval[noise.items],
+                        est.conc=noise.passer[noise.ser],
+                        method=method,
+                        silent=silent,
+                        trace=trace)
+        noise.pass2[noise.ser] <- noise.fs$est.conc
+        noise.warn2[noise.ser] <- noise.fs$warn
+    }
+
+    if (verbose) {
+        cat("Finished estimating noise EC50 values. Coefficients:", "\n")
+        print(summary(noise.pass2))
+        cat("warnings:", "\n")
+        print(paste(noise.warn2, collapse="; "))
+        flush.console()
+    }
+    return(noise.pass2)
 }
 
 

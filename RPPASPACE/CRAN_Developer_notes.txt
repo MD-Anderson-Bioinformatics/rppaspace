@@ -12,9 +12,9 @@ R CMD build --compact-vignettes="gs+qpdf" RPPASPACE
 
 From command line:
 Run CRAN check against built package, not the source directory or you'll probably get many notes, warnings, and/or errors.
-R CMD check --as-cran RPPASPACE_1.0.9.tar.gz
+R CMD check --as-cran RPPASPACE_1.0.10.tar.gz
 
 
 Just a reminder if installing manually from local source package. (Not needed for CRAN)
 Within R:
-install.packages('RPPASPACE_1.0.9.tar.gz', repos=NULL, build_vignettes = TRUE)
+install.packages('RPPASPACE_1.0.10.tar.gz', repos=NULL, build_vignettes = TRUE)

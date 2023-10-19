@@ -3,7 +3,7 @@ title: "Guide_to_RPPASPACE"
 subtitle: "Reverse-Phase Protein Array (RPPA)\n Super Position and Concentration Evaluation (SPACE)"
 author: 
   - James M. Melott and Keith Baggerly
-date: "10/18/2021"
+date: "10/17/2023"
 graphics: yes
 vignette: >
   %\VignetteEngine{knitr::rmarkdown_notangle}
@@ -66,14 +66,15 @@ If you just want to run a sample set of slides through the software to test it o
 To run the test script, do the following:  
 
 1. If on a Unix System, set your environment as explained in the "[Display Adapter Settings on Unix](#unix)"  
-2. If not already installed, install a version of R greater than 2.15 (and optionally RStudio).  
+2. If not already installed, install a version of R greater than 3.5 (and optionally RStudio).  
 3. Run R or RStudio.  
-4. Install all the dependent packages used by RPPASPACE from CRAN using the command: install.packages(c("methods", "doParallel", "foreach", "parallel", "iterators", "utils", "grDevices", "graphics", "stats", "MASS", "cobs", "magrittr", "imager", "bmp", "jpeg", "tiff", "png", "boot", "mgcv", "quantreg", "robustbase", "splines", "timeDate", "knitr", "rmarkdown") If these are not available for the version of R you are using, you may need to install them from source, possibly one at a time.   
-5. Install the RPPASPACE package.  (We hope to eventually make the package vailable on CRAN, but you'll need to use stand-alone package for now.)  install.packages('RPPASPACE_1.0.4.tar.gz', repos=NULL, build_vignettes = TRUE)  
-6. Copy the example script and input files that are a part of the package to a directory where you wish to run the software.  The files can be found in the inst/extdata folder in the package.  
-    + Make a directory for the files.  
+4. Install all the dependent packages used by RPPASPACE from CRAN using the command: install.packages(c("methods", "doParallel", "foreach", "parallel", "iterators", "utils", "grDevices", "graphics", "stats", "bmp", "jpeg", "tiff", "png", "imager", "cobs", "splines", "nmle", "robustbase", "mgcv", "SparseM", "quantreg", "timeDate", "boot", "knitr", "rmarkdown") If these are not available for the version of R you are using, you may need to install them from source, possibly one at a time.   
+5. Install the RPPASPACE package.
+  Install.packages("RPPASPACE")
+6. Copy the example script and input files that are a part of the package to a directory where you wish to run the software.  The files can be found in the inst/extdata folder in the package.
+    + Make a directory for the files.
     + Copy the img and txt directories and their contents from inst/extdata of the package to that directory.
-	+ Unzip the txt.zip file into the txt directory.
+    + Unzip the txt.zip file into the txt directory.
     + Copy the Run.R script from the inst/extdata/sampleCode of the package to that directory.  
 7. Edit the Run.R script and put the path to the directory you moved the files in step 6 above to in the example file in the line that says:  analysishome <- [Insert directory here]  
 8. If you have more than one CPU core available on the machine you are using, you can allow some of the processing to run in parallel by changing the value of number_cpus_to_use in the Run.R file.   For best results without locking up your system, we'd recommend using 1 less than the maximum number of cores you have access to on that system.  
@@ -133,7 +134,7 @@ Although RPPASPACE outputs relative protein concentration values it is possible 
 ***
 The RPPASPACE R package was developed starting with the 1.5.15 version of the SuperCurve R package (see https://bioinformatics.mdanderson.org/public-software/supercurve/). 
 
-Changes were requested that were not compatible with the existing codebase of the SuperCurve package. There was also added emphasis on making the package integrate more easily and provide additional features for a more comprehensive RPPA processing pipeline known as the RADIAN Pipeline (see http://www.radianpipeline.org/).  As a result, a new package was created that eliminated or modified some of the SuperCurve features, added multiple new features, and enhanced the performance of the package overall.  As a consequence, RPPASPACE is no longer compatible with the SuperCurve suite of products at http://r-forge.r-project.org/R/?group_id=1899.  
+Changes were requested that were not compatible with the existing codebase of the SuperCurve package. As a result, a new package was created that eliminated or modified some of the SuperCurve features, added multiple new features, and enhanced the performance of the package overall.  As a consequence, RPPASPACE is no longer compatible with the SuperCurve suite of products at http://r-forge.r-project.org/R/?group_id=1899.
 
 **Some of the differences in RPPASPACE 1.0 from its predecessor SuperCurve include:**
   
@@ -150,7 +151,7 @@ Changes were requested that were not compatible with the existing codebase of th
 **Processing Improvements and package updates:**
 
 * Added optional parallelization of some portions of the code for faster processing of slide sets.
-* Removed dependence of the third-party image processing software product ImageMagick.
+* Removed dependence of the third-party image processing software product ImageMagick being installed on the target machine.
 * Improved error handling.  Processing of slide set even if some slides fail rather than stopping on the first error.
 * Improved error reporting. Outputs error and warning files as part of output with more useful error messages for reporting run-time issues.
 * Made creation of combined output image optional and not done by default and changed format from jpg to png.
@@ -169,7 +170,7 @@ Changes were requested that were not compatible with the existing codebase of th
 * Fixed bug causing CobsFitClass to possibly return concentration data in wrong order.
 * Fixed bug causing spatial correction surface creation to put points on wrong surface.
 * Added additional package imports for processing: doParallel, foreach, parallel, iterators, imager, bmp, jpeg, tiff, png.
-* Improved code base - removed unused portions of code in package including 8 complete source files and updated some deprecated methods in R.  Now passes as-cran R CMD check.
+* Improved code base - removed unused portions of code in package including 8 complete source files and updated some deprecated methods in R.
 * Documented requirement of use of xvfb in headless Unix environments for graphics output.
   
 
@@ -461,10 +462,10 @@ Using RPPASPACE consists of a few steps: setting up your R environment with the 
 ***
 # Setting Up Your R Environment {#r_env}
 ***
-As described in the RPPASPACE package description file, RPPASPACE requires an R version greater than or equal to 2.5 and utilizes the following packages:  
-**Requires**: methods, doParallel, foreach, parallel, iterators  
-**Imports**: utils, grDevices, graphics, stats, MASS, cobs, magrittr, imager, bmp, jpeg, tiff, png  
-**Suggests**: boot, mgcv, quantreg, robustbase, splines, timeDate
+As described in the RPPASPACE package description file, RPPASPACE requires an R version greater than or equal to 3.5 and utilizes the following packages:  
+**Requires**: methods, doParallel, foreach, parallel, iterators
+**Imports**: utils, grDevices, graphics, stats, bmp, jpeg, tiff, png, imager, cobs, splines, nlme, robustbase, mgcv, SparseM, quantreg, timeDate
+**Suggests**: boot, knitr, rmarkdown
 
 It is best to have all of the above packages installed on your system before trying to use RPPASPACE.  
   
@@ -496,10 +497,10 @@ warningsFileName <- "warnings.txt"
 errorsFileName <- "errors.txt"
 
 #Note: Assuming a home directory (analysishome) with the following subdirectories:
-#	txt (containing quantification text files),
-#	tif (containing original tif images of slides)
-#	out (directory for RPPASPACE output files)
-#			out will be created if it doesn't exist and a warning issued if it already exists.
+#    txt (containing quantification text files),
+#    tif (containing original tif images of slides)
+#    out (directory for RPPASPACE output files)
+#        out will be created if it doesn't exist and a warning issued if it already exists.
 
 analysishome <- [Insert directory here]
 
@@ -519,36 +520,41 @@ print(paste("Starting RPPASPACE run in ", analysishome))
 
 Set up RPPASPACE objects to be used in creating RPPASPACESettings object
 designparams <- RPPADesignParams(center=FALSE,
-								 seriesToIgnore=list()
-								 )
-spatialparams <- RPPASpatialParams(cutoff=0.8,
-								   k=100,
-								   gamma=0.1,
-								   plotSurface=FALSE)
-fitparams <- RPPAFitParams(measure="Net.Value",
-						   method="nls",
-						   model="cobs",
-						   trim=2,
-						   ci=FALSE,
-						   ignoreNegative=FALSE,
-						   warnLevel=-1
-						   )
+                                 seriesToIgnore=list(),
+                                 majorXDivisions=as.integer(10),
+                                 majorYDivisions=as.integer(10)
+                                 )
 
-normparams <- RPPANormalizationParams(method="none")	
+spatialparams <- RPPASpatialParams(cutoff=0.8,
+                                   k=100,
+                                   gamma=0.1,
+                                   plotSurface=FALSE)
+
+fitparams <- RPPAFitParams(measure="Net.Value",
+                           method="nls",
+                           model="cobs",
+                           trim=2,
+                           ci=FALSE,
+                           ignoreNegative=FALSE,
+                           warnLevel=-1
+                           )
+
+normparams <- RPPANormalizationParams(method="none")
 
 ## Create RPPASPACESettings object
 settings <- RPPASPACESettings(txtdir=txtdir,
-							   imgdir=imgdir,
-							   outdir=outdir,
-							   designparams=designparams,
-							   spatialparams=spatialparams,
-							   doprefitqc=TRUE,
-							   fitparams=fitparams,
-							   normparams=normparams,
-							   onlynormqcgood=FALSE,
-							   imageextension=".jpg",
-							   warningsFileName=warningsFileName,
-							   parallelClusterSize=as.integer(number_cpus_to_use))
+                              imgdir=NULL,
+                              outdir=outdir,
+                              designparams=designparams,
+                              spatialparams=spatialparams,
+                              doprefitqc=TRUE,
+                              fitparams=fitparams,
+                              normparams=normparams,
+                              onlynormqcgood=FALSE,
+                              imageextension=".jpg",
+                              warningsFileName=warningsFileName,
+                              parallelClusterSize=as.integer(number_cpus_to_use),
+                              createcombinedoutputimage=FALSE)
 
 #Write a copy of the settings object to the output directory so you can record what was requested.
 write.summary(settings)
@@ -577,8 +583,8 @@ error=function(cond) {
 })
 #Turn off the graphics windows so the program can properly close
 graphics.off()
-```  
-  
+```
+
 
 ***
 # Outputs and Output Formats {#outputs}

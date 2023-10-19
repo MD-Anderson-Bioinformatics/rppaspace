@@ -1,42 +1,57 @@
 
-	**************************************************
-	*						 *
-	*	       1.0.9 SERIES NEWS			 *
-	*						 *
-	**************************************************
+    **************************************************
+    *                                                *
+    *              1.0.10 SERIES NEWS                *
+    *                                                *
+    **************************************************
 
-		CHANGES IN R VERSION 1.0.9
-	o	Fixed bug in Prefit QC calculation that was causing QC value to be off by up to +/- 0.1.
+        CHANGES IN R VERSION 1.0.10
+    o    Removed unneccessary dependency on MASS package.
+    o    Removed unneccessary timing point print outs.
+    o    Fixed bug that was causing error when displaying Predicted Slide Quality plot.
+    o    Fixed bug with improperly named image files that was sometimes leaving behind extra temporary files in output directory.
+    o    Updated sample Run.R file with extra parameters to prevent warnings during run.
+    o    Updated documentation and desription file including adding additional authors and contributors.
+    o    Minor updates to formatting in various source and documentation files to make use of spaces and tabs more consistent.
 
+    **************************************************
+    *                                                *
+    *               1.0.9 SERIES NEWS                *
+    *                                                *
+    **************************************************
 
-	**************************************************
-	*						 *
-	*	       1.0.8 SERIES NEWS			 *
-	*						 *
-	**************************************************
-
-		CHANGES IN R VERSION 1.0.8
-
-		o	PNG image showing R2 residuals updated. 
-		    Displays legend by default.
-			Rotates by user specified dimension.
-			Each spot on slide represented by consistent square block of pixels.
-		o	JPEG Graphics output rewritten to use updated PNG file.
-		o	Oriention of slide image vs graphs change based on longer dimension of slide image.
-		o	Depends on many new packages due to graphical changes.
-		o	RPPASPACESettings parameter createoutputjpg changed to createcombinedoutputimage.
-		o	RPPADesignParams parameters majorXDivisions and majorYDivisions allow user to set gridlines on R2 residual graph output.
+        CHANGES IN R VERSION 1.0.9
+    o    Fixed bug in Prefit QC calculation that was causing QC value to be off by up to +/- 0.1.
 
 
-	**************************************************
-	*						 *
-	*	       1.0.4 SERIES NEWS			 *
-	*						 *
-	**************************************************
+    **************************************************
+    *                                                *
+    *           1.0.8 SERIES NEWS             *
+    *                                                *
+    **************************************************
 
-		CHANGES IN R VERSION 1.0.4
+        CHANGES IN R VERSION 1.0.8
+
+        o    PNG image showing R2 residuals updated. 
+            Displays legend by default.
+            Rotates by user specified dimension.
+            Each spot on slide represented by consistent square block of pixels.
+        o    JPEG Graphics output rewritten to use updated PNG file.
+        o    Oriention of slide image vs graphs change based on longer dimension of slide image.
+        o    Depends on many new packages due to graphical changes.
+        o    RPPASPACESettings parameter createoutputjpg changed to createcombinedoutputimage.
+        o    RPPADesignParams parameters majorXDivisions and majorYDivisions allow user to set gridlines on R2 residual graph output.
+
+
+    **************************************************
+    *                                                *
+    *               1.0.4 SERIES NEWS                *
+    *                                                *
+    **************************************************
+
+        CHANGES IN R VERSION 1.0.4
 
 NEW FEATURES
-		o	Initial publicly available version.
-		o	Initial submittal to CRAN.
+        o    Initial publicly available version.
+        o    Initial submittal to CRAN.
 

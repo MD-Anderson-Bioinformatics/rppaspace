@@ -13,7 +13,6 @@ import(cobs)
 import(grDevices)
 import(utils)
 import(grid)
-importFrom("MASS", rlm)
 importFrom("graphics", hist)
 importFrom("graphics", image)
 importFrom("graphics", plot)
@@ -32,7 +31,7 @@ import(png)
 import(tiff)
 import(bmp)
 
-		   
+
 ## Public classes
 exportClasses(RPPADesignParams)
 exportClasses(RPPASpatialParams)

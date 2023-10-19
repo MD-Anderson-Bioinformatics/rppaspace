@@ -96,9 +96,9 @@ setMethod("trimConc", signature(object="FitClass"),
           function(object,
                    conc,
                    intensity,
-				   steps,
+                   steps,
                    trimLevel,
-				   antibody, 
+                   antibody, 
                    ...) {
     stop(sprintf("%s method must be implemented by any subclass of %s",
                  sQuote("trimConc"),
@@ -191,12 +191,12 @@ setMethod("coef", signature(object="FitClass"),
     ## :NOTE: Writing into global environment is considered rude.
 #    assign(".RPPA.fit.model", object, envir=.GlobalEnv)
     assign(".RPPA.fit.model", object, envir=RPPASPACE_Temp_Env)
-	#.RPPA.fit.model <- object
+    #.RPPA.fit.model <- object
 
     tmp <- try({
-					#nls doesn't work correctly if values fit model exactly
-					#nlrob and nlrq both involve randomness and without setting
-					#the seed ahead of time, might give different values each run. (JMM)
+                    #nls doesn't work correctly if values fit model exactly
+                    #nlrob and nlrq both involve randomness and without setting
+                    #the seed ahead of time, might give different values each run. (JMM)
                     #nlsmeth(Y ~ RPPASPACE:::.slide.model(Steps+X),
 
                     nlsmeth(Y ~ .slide.model(Steps+X),
@@ -208,7 +208,7 @@ setMethod("coef", signature(object="FitClass"),
                silent=silent)
 
     if (inherits(tmp, "try-error")) {
-        warn <- "unavoidable nls/rlm error"
+        warn <- "unavoidable nls error"
         ## :TBD: Should 'est.conc' be set to something different on error?
         resids <- 0
         if (!silent) {
@@ -258,9 +258,9 @@ setMethod("coef", signature(object="FitClass"),
 .generic.trim <- function(object,
                           conc,
                           intensity,
-						  steps,
+                          steps,
                           trimLevel,
-						  antibody, 
+                          antibody, 
                           ...) {
     ## Check arguments
     stopifnot(is.FitClass(object))
@@ -284,53 +284,53 @@ setMethod("coef", signature(object="FitClass"),
 
     ## Search fitted model to find conc corresponding to lo.intensity
     print(paste("Antibody ", antibody, " min conc=", min(conc, na.rm=TRUE), ", max conc=", max(conc, na.rm=TRUE), sep=""))
-	lo.conc  <- tryCatch({
-		bisection.search(
-			min(conc, na.rm=TRUE),
-			max(conc, na.rm=TRUE),
-			function(x, object) {
-				fitted(object, x) - lo.intensity
-			},
-			f.extra=object,
-			tol=0.1)$x
-		},
-			error=function(e) {
-				msg <- paste("Antibody (", antibody, ") Unable to calculate low concentration value. Setting value to NA", sep="")
-				warning(msg)
-				message(msg)
-				NA
-	})
+    lo.conc  <- tryCatch({
+        bisection.search(
+            min(conc, na.rm=TRUE),
+            max(conc, na.rm=TRUE),
+            function(x, object) {
+                fitted(object, x) - lo.intensity
+            },
+            f.extra=object,
+            tol=0.1)$x
+        },
+            error=function(e) {
+                msg <- paste("Antibody (", antibody, ") Unable to calculate low concentration value. Setting value to NA", sep="")
+                warning(msg)
+                message(msg)
+                NA
+    })
 
     ## Adjust min allowable conc to point at undiluted spot
-	if (!is.na(lo.conc)) {
-		max.step <- max(steps)
-		lo.conc <- lo.conc - max.step
-	}
-	
-	
-	hi.conc  <- tryCatch({
-		bisection.search(
-			min(conc, na.rm=TRUE),
-			max(conc, na.rm=TRUE),
-			function(x, object) {
-				fitted(object, x) - hi.intensity
-			},
-			f.extra=object,
-			tol=0.1)$x
-		},
-			error=function(e) {
-				msg <- paste("Antibody (", antibody, ") Unable to calculate high concentration value. Setting value to NA", sep="")
-				warning(msg)
-				message(msg)
-				NA
-	})
+    if (!is.na(lo.conc)) {
+        max.step <- max(steps)
+        lo.conc <- lo.conc - max.step
+    }
+    
+    
+    hi.conc  <- tryCatch({
+        bisection.search(
+            min(conc, na.rm=TRUE),
+            max(conc, na.rm=TRUE),
+            function(x, object) {
+                fitted(object, x) - hi.intensity
+            },
+            f.extra=object,
+            tol=0.1)$x
+        },
+            error=function(e) {
+                msg <- paste("Antibody (", antibody, ") Unable to calculate high concentration value. Setting value to NA", sep="")
+                warning(msg)
+                message(msg)
+                NA
+    })
 
     ## Adjust max allowable conc to point at most dilute spot
     if (!is.na(hi.conc)) {
-		min.step <- min(steps)
-		hi.conc <- hi.conc - min.step
-	}
-	
+        min.step <- min(steps)
+        hi.conc <- hi.conc - min.step
+    }
+    
     list(lo.intensity=lo.intensity,
          hi.intensity=hi.intensity,
          lo.conc=lo.conc,
@@ -398,9 +398,9 @@ setMethod("trimConc", signature(object="LoessFitClass"),
           function(object,
                    conc,
                    intensity,
-				   steps,
+                   steps,
                    trimLevel=2,  # arbitrary based on experimentation
-				   antibody,
+                   antibody,
                    ...) {
     .generic.trim(object, conc, intensity, steps, trimLevel, antibody, ...)
 })
@@ -431,10 +431,10 @@ setMethod("fitSlide", signature(object="CobsFitClass"),
                   tau=0.5,
                   print.warn=FALSE,
                   print.mesg=FALSE,
-				  maxiter=300
-				  )
+                  maxiter=300
+                  )
 
-	## Create new class
+    ## Create new class
     new("CobsFitClass",
         model=model,
         lambda=model$lambda)
@@ -482,46 +482,46 @@ setMethod("fitted", signature(object="CobsFitClass"),
 
     ## :TODO: Add argument to enable Jianhua's code, or remove it
     intensity <- if (TRUE) {
-		 ## predict.cobs is irritating
-		 ## It returns predicted values after sorting on the input
-		 ## vector. So we get intensity ~ sort(fit)
-		 ## We need to undo this sort to find predictions using the
-		 ## original concentration ordering
-		 n <- length(conc.pred)
-		 if (n > 1) {
+         ## predict.cobs is irritating
+         ## It returns predicted values after sorting on the input
+         ## vector. So we get intensity ~ sort(fit)
+         ## We need to undo this sort to find predictions using the
+         ## original concentration ordering
+         n <- length(conc.pred)
+         if (n > 1) {
 
-			 ## Undo sort on fit
-			 o <- sort.list(conc.pred,
-							method="quick",
-							na.last=NA)
-			 u <- rep(NA, n)
-			 u[o] <- seq_along(conc.pred)
-			 cobs.intensity <- predict(model, conc.pred[o])[, "fit"]
-			 cobs.intensity[u]
-		 } else {
-			 ## Only one data point
-			 predict(model, conc.pred)[, "fit"]
-		 }
-	 } else {
-		 if (!requireNamespace("splines")) {
-			 stop(sprintf("%s package required for %s method",
-						  sQuote("splines"),
-						  sQuote("fitted")))
-		 }
+             ## Undo sort on fit
+             o <- sort.list(conc.pred,
+                            method="quick",
+                            na.last=NA)
+             u <- rep(NA, n)
+             u[o] <- seq_along(conc.pred)
+             cobs.intensity <- predict(model, conc.pred[o])[, "fit"]
+             cobs.intensity[u]
+         } else {
+             ## Only one data point
+             predict(model, conc.pred)[, "fit"]
+         }
+     } else {
+         if (!requireNamespace("splines")) {
+             stop(sprintf("%s package required for %s method",
+                          sQuote("splines"),
+                          sQuote("fitted")))
+         }
 
-		 ## The above sort and unsort process is yucky and a bit
-		 ## slow. Jianhua did not use the cobs predict method and
-		 ## instead evaluates the spline directly. Unfortunately,
-		 ## there seems to be a bug in .predict.spline where it does
-		 ## not have the correct number of coefficients sometimes.
+         ## The above sort and unsort process is yucky and a bit
+         ## slow. Jianhua did not use the cobs predict method and
+         ## instead evaluates the spline directly. Unfortunately,
+         ## there seems to be a bug in .predict.spline where it does
+         ## not have the correct number of coefficients sometimes.
 
-		 .predict.spline(conc.pred,
-						 model$knots,
-						 model$coef)
-	 }
+         .predict.spline(conc.pred,
+                         model$knots,
+                         model$coef)
+     }
 
     intensity[is.na(conc)] <- NA
-	
+    
     intensity
 })
 
@@ -546,9 +546,9 @@ setMethod("trimConc", signature(object="CobsFitClass"),
           function(object,
                    conc,
                    intensity,
-				   steps,
+                   steps,
                    trimLevel=2,  # arbitrary based on experimentation
-				   antibody,
+                   antibody,
                    ...) {
     .generic.trim(object, conc, intensity, steps, trimLevel, antibody, ...)
 })
@@ -589,8 +589,8 @@ setMethod("fitSlide", signature(object="LogisticFitClass"),
                    intensity,
                    ...) {
     cf <- as.list(coef(object))
-	
-	magicOffset <- 5000
+    
+    magicOffset <- 5000
 
     if (cf$gamma == 0) {
         ## Initialize coefficients
@@ -653,9 +653,9 @@ setMethod("trimConc", signature(object="LogisticFitClass"),
           function(object,
                    conc,
                    intensity,
-				   steps,
+                   steps,
                    trimLevel=2,  # arbitrary based on experimentation
-				   antibody,
+                   antibody,
                    ...) {
     cf <- as.list(object@coefficients)
     noise <- .est.bg.noise(object, conc, intensity, trimLevel)
@@ -663,7 +663,7 @@ setMethod("trimConc", signature(object="LogisticFitClass"),
 
     if (trim <= 0 || trim >= 1) {
         warning(sprintf("Antibody (%s) trimConc: trim should be in interval (0, 1): trim=%s",
-						antibody,
+                        antibody,
                         trim),
                 immediate.=TRUE)
     }
@@ -685,7 +685,7 @@ setMethod("trimConc", signature(object="LogisticFitClass"),
     lo.logit <- tryCatch(boot::logit(trim),
                          error=function(cond) {
                              warning(sprintf("Antibody (%s) logit: %s: p=%f, odds=%f",
-											 antibody, 
+                                             antibody, 
                                              conditionMessage(cond),
                                              p <- trim,
                                              p / (1 - p)),
@@ -696,7 +696,7 @@ setMethod("trimConc", signature(object="LogisticFitClass"),
     hi.logit <- tryCatch(boot::logit(1-trim),
                          error=function(cond) {
                              warning(sprintf("Antibody (%s) logit: %s: p=%f, odds=%f",
-											 antibody, 
+                                             antibody, 
                                              conditionMessage(cond),
                                              p <- 1-trim,
                                              p / (1 - p)),
