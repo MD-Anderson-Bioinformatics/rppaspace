@@ -6,12 +6,12 @@
     **************************************************
 
         CHANGES IN R VERSION 1.0.10
-    o    Removed unneccessary dependency on MASS package.
-    o    Removed unneccessary timing point print outs.
+    o    Removed unnecessary dependency on MASS package.
+    o    Removed unnecessary timing point print outs.
     o    Fixed bug that was causing error when displaying Predicted Slide Quality plot.
     o    Fixed bug with improperly named image files that was sometimes leaving behind extra temporary files in output directory.
     o    Updated sample Run.R file with extra parameters to prevent warnings during run.
-    o    Updated documentation and desription file including adding additional authors and contributors.
+    o    Updated documentation and description file including adding additional authors and contributors.
     o    Minor updates to formatting in various source and documentation files to make use of spaces and tabs more consistent.
 
     **************************************************
