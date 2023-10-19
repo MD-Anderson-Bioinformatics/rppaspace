@@ -84,7 +84,7 @@ Imports: utils, grDevices, graphics, stats, bmp, jpeg, tiff, png, imager, cobs, 
 Suggests: boot, knitr, rmarkdown
 NeedsCompilation: no
 VignetteBuilder: knitr, rmarkdown
-URL: https://pubmed.ncbi.nlm.nih.gov/36205581, https://github.com/MD-Anderson-Bioinformatics/rppaspace, https://bioinformatics.mdanderson.org/public-software/rppaspace
+URL: https://pubmed.ncbi.nlm.nih.gov/36205581, https://github.com/MD-Anderson-Bioinformatics/rppaspace, https://bioinformatics.mdanderson.org/public-software/rppaspace/
 License: Artistic-2.0
 Copyright: file inst/COPYRIGHTS
 LazyLoad: yes
